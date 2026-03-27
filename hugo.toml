@@ -1,3 +1,7 @@
+baseURL = "https://kenayah.github.io/soulFood/"
+languageCode = "en-us"
+title = "Soul Food"
+theme = "hugo-universal-theme"
 
 # Preloader
 [params.preloader]
