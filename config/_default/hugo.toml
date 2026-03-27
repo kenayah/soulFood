@@ -17,9 +17,6 @@ pagination.pagerSize = 4
   [caches.images]
     dir = ':resourceDir/_gen'
     maxAge = -1
-  [caches.misc]
-    dir = ':cacheDir/:project'
-    maxAge = -1
   [caches.modulegitinfo]
     dir = ':cacheDir/modules'
     maxAge = '24h'
