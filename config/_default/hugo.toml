@@ -1,7 +1,31 @@
 ######################## default configuration ####################
-baseURL = "/"
+baseURL = "https://kenayah.github.io/soulFood/"
 languageCode = "en-us"
 title = "soulFood sa"
 theme = "restaurant-hugo"
 summaryLength = "10"
 pagination.pagerSize = 4
+
+######################## cache ####################################
+[caches]
+  [caches.assets]
+    dir = ':resourceDir/_gen'
+    maxAge = -1
+  [caches.getresource]
+    dir = ':cacheDir/:project'
+    maxAge = -1
+  [caches.images]
+    dir = ':resourceDir/_gen'
+    maxAge = -1
+  [caches.misc]
+    dir = ':cacheDir/:project'
+    maxAge = -1
+  [caches.modulegitinfo]
+    dir = ':cacheDir/modules'
+    maxAge = '24h'
+  [caches.modulequeries]
+    dir = ':cacheDir/modules'
+    maxAge = '24h'
+  [caches.modules]
+    dir = ':cacheDir/modules'
+    maxAge = -1
