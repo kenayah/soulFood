@@ -1,7 +1,0 @@
-######################## default configuration ####################
-baseURL = "/"
-languageCode = "en-us"
-title = "Restaurant Hugo"
-theme = "restaurant-hugo"
-summaryLength = "10"
-pagination.pagerSize = 4

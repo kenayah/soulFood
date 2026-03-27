@@ -1,0 +1,97 @@
+################## Hero area ##################
+hero_area:
+  enable : true
+  bg_image : "images/header.png"
+  overlay : true
+
+################### Gallery ###################
+gallery:
+  enable : true
+  title : "PLATES"
+  images:
+    - "images/slider/slider-img-1.png"
+    - "images/slider/slider-img-2.png"
+    - "images/slider/slider-img-3.png"
+    - "images/slider/slider-img-4.png"
+    - "images/slider/slider-img-6.png"
+    - "images/slider/slider-img-5.png"
+    - "images/slider/slider-img-7.png"
+    - "images/slider/slider-img-5.png"
+    # - "images/slider/slider-img-6.png"
+    # - "images/slider/slider-img-1.png"
+    # - "images/slider/slider-img-7.png"
+    # - "images/slider/slider-img-1.png"
+    # - "images/slider/slider-img-1.jpg"
+    # - "images/slider/slider-img-2.jpg"
+    # - "images/slider/slider-img-3.jpg"
+    # - "images/slider/slider-img-4.jpg"
+
+################ About #######################
+about:
+  enable : true
+  image : "images/cooker-img-1.png"
+  # title : "The Feel & Taste of <span> Ikhaya </span> , eish" 
+  title : "The Taste of South African <span> Comfort Meal </span> on a Plate" 
+  description : "Ikhaya</br>The unmistakable feel & taste of home."
+  
+################# Blog ######################
+blog:
+  enable : true
+  title : "Our Latest <span>Blog</span>"
+  bg_image : "images/blog/blog-bg.png"
+  overlay : true
+
+
+################# food Menu ################
+pricing:
+  enable : true
+  title : "Our Easy <span>PRICE</span>"
+  description: "Our focus is on providing a good deal and <b>Overall Great Vibes</b> altpgether, ensuring the price is reasonable."
+  subtitle : "FEATURED ON THE WEEK"
+  pricing_item:
+  - title: "Mogodu Wednesday"
+    description: "Deliciously slow cooked tripe served with Butternut & Creamy Spinach."
+    starch: "Creamy Samp or Steamed Bread"
+    price : "R 90.00"
+
+  - title: "Umleqwa Friday"
+    description: "Tender Hardbody Chicken, served with Chakalaka & Spicy Spinach."
+    starch: "Samp & Beans or Steamed Bread"
+    price : "R 100.00"
+    
+  - title: "Sunday Kos Meal"
+    description: "Fried Savoury Rice, Beef Stew, Creamy Spinach, Roasted Butternut with Feta & Chakalaka."
+    price : "R 120.00"
+    
+  - title: "Sunday Kos 7 Colors Meal"
+    description: "Fried Savoury Rice, Beef Stew, Potato Salad, Chakalaka, Roasted Butternut with Feta, Creamy Spinach & Beetroot."
+    price : "R 150.00"
+    
+  - title: "Ama Zulu Beef Stew"
+    description: "Slowly Cooked Beef from Ma Gogo's Pot"
+    price : "R 145.00"
+
+  - title: "Side Dishes"
+    description: "Chakalaka, Roasted Butternut with Feta, Creamy Spinach, Spicy Spinach, Potato Salad"
+    price : "R 35.00"
+   
+  - title: "Starch Options"
+    description: "Creamy Samp, Samp & Beans, Steamed Bread, Fried Savoury Rice & Plain Rice"
+
+################### Subscription ################
+subscription:
+  enable : true
+  bg_image : "images/subscribe-bg.jpg"
+  title : "SUBSCRIBE to our <span>NEWSLETTER</span>"
+  description : "The Tradition of Keeping The Word Alive is Still Real."
+  #Mailchimp subscription configaration 
+  form_action : "https://themefisher.us9.list-manage.com/subscribe/post?u=f95ece2732a6e9925f2e70a61&amp;id=b1e227529e"
+  formName : "b_f95ece2732a6e9925f2e70a61_b1e227529e"
+  overlay : true
+
+################ Contact #######################
+contact:
+  enable : true
+  title: "Let's <span> Contact Us </span>"
+  subtitle: "SIGN UP FOR EMAIL ALERTS"
+  form_action : "#" #contact form works with formspree.io

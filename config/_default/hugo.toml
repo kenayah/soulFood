@@ -1,0 +1,7 @@
+######################## default configuration ####################
+baseURL = "/"
+languageCode = "en-us"
+title = "soulFood sa"
+theme = "restaurant-hugo"
+summaryLength = "10"
+pagination.pagerSize = 4
