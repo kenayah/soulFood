@@ -1,7 +1,7 @@
 ################## Hero area ##################
 hero_area:
   enable : true
-  bg_image : "images/header.png"
+  bg_image : "images/header.jpg"
   overlay : true
 
 ################### Gallery ###################
@@ -9,14 +9,14 @@ gallery:
   enable : true
   title : "PLATES"
   images:
-    - "images/slider/slider-img-1.png"
-    - "images/slider/slider-img-2.png"
-    - "images/slider/slider-img-3.png"
-    - "images/slider/slider-img-4.png"
-    - "images/slider/slider-img-6.png"
-    - "images/slider/slider-img-5.png"
-    - "images/slider/slider-img-7.png"
-    - "images/slider/slider-img-5.png"
+    - "images/slider/slider-img-1.jpg"
+    - "images/slider/slider-img-2.jpg"
+    - "images/slider/slider-img-3.jpg"
+    - "images/slider/slider-img-4.jpg"
+    - "images/slider/slider-img-6.jpg"
+    - "images/slider/slider-img-5.jpg"
+    - "images/slider/slider-img-7.jpg"
+    - "images/slider/slider-img-5.jpg"
     # - "images/slider/slider-img-6.png"
     # - "images/slider/slider-img-1.png"
     # - "images/slider/slider-img-7.png"
@@ -29,7 +29,7 @@ gallery:
 ################ About #######################
 about:
   enable : true
-  image : "images/cooker-img-1.png"
+  image : "images/cooker-img-1.webp"
   # title : "The Feel & Taste of <span> Ikhaya </span> , eish" 
   title : "The Taste of South African <span> Comfort Meal </span> on a Plate" 
   description : "Ikhaya</br>The unmistakable feel & taste of home."
