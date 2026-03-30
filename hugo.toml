@@ -3,24 +3,33 @@ languageCode = "en-us"
 title = "Soul Food"
 theme = "restaurant-hugo"
 
-[params.plugins]
-css = [
-  "css/bootstrap.min.css",
-  "css/font-awesome.min.css",
-  "css/animate.min.css",
-  "css/slick.css",
-  "css/venobox.css",
-  "css/main.css",
-  "css/responsive.css"
-]
-js = [
-  "js/jquery.min.js",
-  "js/bootstrap.min.js",
-  "js/slick.min.js",
-  "js/wow.min.js",
-  "js/venobox.min.js",
-  "js/main.js"
-]
+[[params.plugins.css]]
+URL = "css/bootstrap.min.css"
+[[params.plugins.css]]
+URL = "css/font-awesome.min.css"
+[[params.plugins.css]]
+URL = "css/animate.min.css"
+[[params.plugins.css]]
+URL = "css/slick.css"
+[[params.plugins.css]]
+URL = "css/venobox.css"
+[[params.plugins.css]]
+URL = "css/main.css"
+[[params.plugins.css]]
+URL = "css/responsive.css"
+
+[[params.plugins.js]]
+URL = "js/jquery.min.js"
+[[params.plugins.js]]
+URL = "js/bootstrap.min.js"
+[[params.plugins.js]]
+URL = "js/slick.min.js"
+[[params.plugins.js]]
+URL = "js/wow.min.js"
+[[params.plugins.js]]
+URL = "js/venobox.min.js"
+[[params.plugins.js]]
+URL = "js/main.js"
 
 # Preloader
 [params.preloader]
