@@ -2,45 +2,45 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Soul Food</title>
-    <link>//:1313/post/</link>
+    <link>http://localhost:1313/post/</link>
     <description>Recent content in Posts on Soul Food</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 26 Dec 2018 12:30:01 +0600</lastBuildDate>
-    <atom:link href="//:1313/post/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Cow&#39;s Head</title>
-      <link>//:1313/post/red-pepper-miso-wings-2/</link>
+      <link>http://localhost:1313/post/red-pepper-miso-wings-2/</link>
       <pubDate>Wed, 26 Dec 2018 12:30:01 +0600</pubDate>
-      <guid>//:1313/post/red-pepper-miso-wings-2/</guid>
+      <guid>http://localhost:1313/post/red-pepper-miso-wings-2/</guid>
       <description>&lt;p&gt;Big Fat Cow&amp;rsquo;s Head Cooked Ama Zulu Style&lt;/p&gt;</description>
     </item>
     <item>
       <title>Steamed Bread</title>
-      <link>//:1313/post/red-pepper-miso-wings/</link>
+      <link>http://localhost:1313/post/red-pepper-miso-wings/</link>
       <pubDate>Wed, 26 Dec 2018 12:28:47 +0600</pubDate>
-      <guid>//:1313/post/red-pepper-miso-wings/</guid>
+      <guid>http://localhost:1313/post/red-pepper-miso-wings/</guid>
       <description>&lt;p&gt;The Taste of a Long Lasting Tradition Carefully Passed Through Generation&lt;/p&gt;</description>
     </item>
     <item>
       <title>Beans Salad</title>
-      <link>//:1313/post/homestyle-chicken-pot-pie/</link>
+      <link>http://localhost:1313/post/homestyle-chicken-pot-pie/</link>
       <pubDate>Wed, 26 Dec 2018 12:23:10 +0600</pubDate>
-      <guid>//:1313/post/homestyle-chicken-pot-pie/</guid>
+      <guid>http://localhost:1313/post/homestyle-chicken-pot-pie/</guid>
       <description>&lt;p&gt;Our beloved vegetable garden does not disappoint!&lt;/p&gt;</description>
     </item>
     <item>
       <title>Tripe &amp; Butternut</title>
-      <link>//:1313/post/restaurant/</link>
+      <link>http://localhost:1313/post/restaurant/</link>
       <pubDate>Wed, 26 Dec 2018 11:40:41 +0600</pubDate>
-      <guid>//:1313/post/restaurant/</guid>
+      <guid>http://localhost:1313/post/restaurant/</guid>
       <description>&lt;p&gt;Deliciously slow cooked tripe served with Butternut and Creamy Spinach.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Red Pepper Miso Wings</title>
-      <link>//:1313/post/my-first-post/</link>
+      <link>http://localhost:1313/post/my-first-post/</link>
       <pubDate>Wed, 12 Dec 2018 04:28:21 +0600</pubDate>
-      <guid>//:1313/post/my-first-post/</guid>
+      <guid>http://localhost:1313/post/my-first-post/</guid>
       <description>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit. Porro modi delectus rerum, sed blanditiis eaque eum, ex et officia veritatis id hic. Deleniti eos ipsum, nihil ex id ipsa porro, accusantium, accusamus dignissimos harum, veniam culpa. Voluptate doloremque aspernatur neque vero tenetur numquam expedita ratione, sed, error exercitationem officia voluptatum molestiae quod impedit facilis, dolores laudantium quae rem! Rem obcaecati eum pariatur error quasi consequuntur repellendus aliquam vero perferendis, praesentium. Quas nulla, quae tempore omnis facere reiciendis, voluptatibus illum nemo consequuntur, magni voluptas doloremque eveniet quasi soluta porro sit cum? Alias a rerum natus, repellendus voluptas libero! Deleniti aut, sunt.&lt;/p&gt;</description>
     </item>
   </channel>
