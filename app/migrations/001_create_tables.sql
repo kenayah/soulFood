@@ -1,0 +1,136 @@
+CREATE TABLE IF NOT EXISTS menu_categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    available BOOLEAN NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS menu_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    price REAL NOT NULL,
+    category_id INTEGER REFERENCES menu_categories(id),
+    image TEXT,
+    prep_time_minutes INTEGER,
+    available BOOLEAN NOT NULL DEFAULT 1,
+    ingredients_list TEXT,
+    stock_keep_unit INTEGER,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS menu_specials (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    menu_item_id INTEGER NOT NULL REFERENCES menu_items(id),
+    day_of_week TEXT NOT NULL,
+    special_price REAL NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    delivery_address TEXT,
+    notes TEXT,
+    status TEXT NOT NULL DEFAULT 'placed' CHECK(status IN ('placed','confirmed','preparing','ready','out_for_delivery','delivered','cancelled')),
+    total REAL NOT NULL DEFAULT 0,
+    payment_status TEXT NOT NULL DEFAULT 'pending' CHECK(payment_status IN ('pending','verified','captured','refunded','failed')),
+    payment_method TEXT NOT NULL DEFAULT 'cash',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL REFERENCES orders(id),
+    menu_item_id INTEGER REFERENCES menu_items(id),
+    item_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    unit_price REAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS order_status_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL REFERENCES orders(id),
+    from_status TEXT,
+    to_status TEXT NOT NULL,
+    changed_by TEXT NOT NULL DEFAULT 'system',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL REFERENCES orders(id),
+    provider TEXT NOT NULL,
+    provider_tx_id TEXT,
+    amount REAL NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','completed','failed','refunded')),
+    currency TEXT NOT NULL DEFAULT 'ZAR',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS ingredients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    unit TEXT NOT NULL DEFAULT 'pieces',
+    current_stock REAL NOT NULL DEFAULT 0,
+    min_stock_level REAL NOT NULL DEFAULT 0,
+    max_stock_level REAL,
+    reorder_quantity REAL,
+    unit_cost REAL,
+    supplier_id INTEGER REFERENCES suppliers(id),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS suppliers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    contact_person TEXT,
+    phone TEXT,
+    email TEXT,
+    lead_time_days INTEGER DEFAULT 1,
+    active BOOLEAN NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS purchase_orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    supplier_id INTEGER NOT NULL REFERENCES suppliers(id),
+    status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','sent','received','cancelled')),
+    total REAL,
+    expected_delivery TEXT,
+    received_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS purchase_order_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    purchase_order_id INTEGER NOT NULL REFERENCES purchase_orders(id),
+    ingredient_id INTEGER NOT NULL REFERENCES ingredients(id),
+    quantity_ordered REAL NOT NULL,
+    quantity_received REAL DEFAULT 0,
+    unit_price REAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL,
+    order_id INTEGER NOT NULL,
+    message TEXT,
+    acknowledged INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
+CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_menu_items_category ON menu_items(category_id);
+CREATE INDEX IF NOT EXISTS idx_ingredients_stock ON ingredients(current_stock);
+CREATE INDEX IF NOT EXISTS idx_order_status_log_order ON order_status_log(order_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_ack ON notifications(acknowledged);

@@ -1,0 +1,20 @@
+{
+  "name": "soulfood-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate:local": "wrangler d1 execute soulfood-dev --file=migrations/001_create_tables.sql",
+    "migrate:prod": "wrangler d1 execute soulfood --remote --file=migrations/001_create_tables.sql"
+  },
+  "dependencies": {
+    "hono": "^4.7.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250201.0",
+    "wrangler": "^3.100.0",
+    "typescript": "^5.7.0"
+  }
+}

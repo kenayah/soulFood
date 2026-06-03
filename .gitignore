@@ -1,4 +1,11 @@
-public/
-resources/
-themes/restaurant-hugo/exampleSite/
-static/images/_old/
+site/public/
+site/resources/
+site/themes/restaurant-hugo/exampleSite/
+site/static/images/_old/
+
+# Generated docs
+soulfood-documentation.pdf
+.tmp-docs.html
+scripts/node_modules/
+app/node_modules/
+app/.wrangler/
