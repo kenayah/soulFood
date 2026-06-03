@@ -1,5 +1,5 @@
 baseURL = "https://kenayah.github.io/soulFood/"
-languageCode = "en-us"
+locale = "en-US"
 title = "Soul Food"
 theme = "restaurant-hugo"
 
