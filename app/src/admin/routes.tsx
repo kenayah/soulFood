@@ -12,10 +12,10 @@ type Bindings = { DB: D1Database; ADMIN_TOKEN?: string }
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-app.use("/admin/*", requireAdmin)
+app.use("/*", requireAdmin)
 
 app.use(
-  "/admin/*",
+  "/*",
   jsxRenderer(({ children }) => (
     <html lang="en">
       <head>
@@ -50,7 +50,7 @@ app.use(
   )),
 )
 
-app.get("/admin/login", (c) => {
+app.get("/login", (c) => {
   return c.html(
     <html lang="en">
       <head>
@@ -78,7 +78,7 @@ app.get("/admin/login", (c) => {
   )
 })
 
-app.post("/admin/login", async (c) => {
+app.post("/login", async (c) => {
   const body = await c.req.parseBody()
   const token = body.token as string
   const expected = c.env.ADMIN_TOKEN
@@ -94,7 +94,7 @@ app.post("/admin/login", async (c) => {
   )
 })
 
-app.get("/admin/dashboard", async (c) => {
+app.get("/dashboard", async (c) => {
   const db = getDb(c.env)
   const stats = await getDashboardStats(db)
 
@@ -169,9 +169,9 @@ app.get("/admin/dashboard", async (c) => {
   )
 })
 
-app.get("/admin", (c) => c.redirect("/admin/dashboard"))
+app.get("/", (c) => c.redirect("/dashboard"))
 
-app.get("/admin/orders", async (c) => {
+app.get("/orders", async (c) => {
   const db = getDb(c.env)
   const status = c.req.query("status")
   const { orders } = await getOrders(db, { status, limit: 50 })
@@ -223,7 +223,7 @@ app.get("/admin/orders", async (c) => {
   )
 })
 
-app.get("/admin/orders/:id", async (c) => {
+app.get("/orders/:id", async (c) => {
   const id = parseInt(c.req.param("id"))
   const db = getDb(c.env)
   const order = await getOrderById(db, id)
@@ -314,7 +314,7 @@ app.get("/admin/orders/:id", async (c) => {
   )
 })
 
-app.get("/admin/menu", async (c) => {
+app.get("/menu", async (c) => {
   const db = getDb(c.env)
   const categories = await getCategories(db)
   const items = await getMenuItems(db)
@@ -370,7 +370,7 @@ app.get("/admin/menu", async (c) => {
   )
 })
 
-app.get("/admin/stock", async (c) => {
+app.get("/stock", async (c) => {
   const db = getDb(c.env)
   const ingredients = await getIngredients(db)
 
@@ -414,7 +414,7 @@ app.get("/admin/stock", async (c) => {
   )
 })
 
-app.get("/admin/reports", async (c) => {
+app.get("/reports", async (c) => {
   const db = getDb(c.env)
   const today = new Date().toISOString().split("T")[0]
   const report = await getDailyReport(db, today)

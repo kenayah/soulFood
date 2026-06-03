@@ -37,7 +37,10 @@ app.route("/api/payments", paymentsRoutes)
 app.route("/api/notifications", notificationsRoutes)
 
 // Admin SSR dashboard
-app.route("/", adminRoutes)
+app.route("/admin", adminRoutes)
+
+// Root redirect
+app.get("/", (c) => c.redirect("/admin/dashboard"))
 
 app.notFound((c) => c.json({ error: "Not found" }, 404))
 
