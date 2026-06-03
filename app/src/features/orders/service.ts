@@ -1,5 +1,5 @@
 import type { D1Database } from "@cloudflare/workers-types"
-import { getDb, queryAll, queryOne, execute } from "../lib/d1"
+import { getDb, queryAll, queryOne, execute } from "../../lib/d1"
 
 export interface OrderItemRow {
   id: number

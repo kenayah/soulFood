@@ -1,14 +1,16 @@
 import { Hono } from "hono"
 import type { D1Database } from "@cloudflare/workers-types"
 import { jsxRenderer } from "hono/jsx-renderer"
-import { getDb } from "../../lib/d1"
-import { getDashboardStats, getOrders, getOrderById, getOrderItems, getOrderStatusLog } from "../../features/orders/service"
-import { getCategories, getMenuItems } from "../../features/menu/service"
-import { getIngredients } from "../../features/stock/service"
-import { getDailyReport } from "../../features/reporting/service"
-import { requireAdmin } from "../../auth/middleware"
+import { getDb } from "../lib/d1"
+import { getDashboardStats, getOrders, getOrderById, getOrderItems, getOrderStatusLog } from "../features/orders/service"
+import { getCategories, getMenuItems } from "../features/menu/service"
+import { getIngredients } from "../features/stock/service"
+import { getDailyReport } from "../features/reporting/service"
+import { requireAdmin } from "../auth/middleware"
 
-const app = new Hono<{ Bindings: { DB: D1Database } }>()
+type Bindings = { DB: D1Database; ADMIN_TOKEN?: string }
+
+const app = new Hono<{ Bindings: Bindings }>()
 
 app.use("/admin/*", requireAdmin)
 
@@ -63,7 +65,7 @@ app.get("/admin/login", (c) => {
       <body class="bg-light">
         <div class="container" style="max-width: 400px; margin-top: 100px">
           <h2 class="mb-4">SoulFood Admin</h2>
-          <form method="POST" action="/admin/login">
+          <form method="post" action="/admin/login">
             <div class="mb-3">
               <label class="form-label">Token</label>
               <input type="password" name="token" class="form-control" required />

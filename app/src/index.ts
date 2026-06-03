@@ -18,26 +18,29 @@ app.use("*", logger())
 app.use("*", secureHeaders())
 app.use("/api/*", cors())
 
-// Health check
 app.get("/api/health", (c) => c.json({ status: "ok", service: "soulfood-api" }))
 
-// Public routes — no auth needed
+// Public routes
 app.route("/api/orders", ordersRoutes)
 
 // Authenticated API routes
-app.route("/api/menu", requireAuth, menuRoutes)
-app.route("/api/stock", requireAuth, stockRoutes)
-app.route("/api/reports", requireAuth, reportingRoutes)
-app.route("/api/payments", requireAuth, paymentsRoutes)
-app.route("/api/notifications", requireAuth, notificationsRoutes)
+app.use("/api/menu/*", requireAuth)
+app.use("/api/stock/*", requireAuth)
+app.use("/api/reports/*", requireAuth)
+app.use("/api/payments/*", requireAuth)
+app.use("/api/notifications/*", requireAuth)
+
+app.route("/api/menu", menuRoutes)
+app.route("/api/stock", stockRoutes)
+app.route("/api/reports", reportingRoutes)
+app.route("/api/payments", paymentsRoutes)
+app.route("/api/notifications", notificationsRoutes)
 
 // Admin SSR dashboard
 app.route("/", adminRoutes)
 
-// 404
 app.notFound((c) => c.json({ error: "Not found" }, 404))
 
-// Error handler
 app.onError((err, c) => {
   console.error(err)
   return c.json({ error: "Internal server error" }, 500)
