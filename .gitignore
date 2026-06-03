@@ -10,3 +10,4 @@ soulfood-leaflet.pdf
 scripts/node_modules/
 app/node_modules/
 app/.wrangler/
+app/.dev.vars
