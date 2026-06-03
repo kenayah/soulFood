@@ -3,8 +3,9 @@ site/resources/
 site/themes/restaurant-hugo/exampleSite/
 site/static/images/_old/
 
-# Generated docs
+# Generated artifacts
 soulfood-documentation.pdf
+soulfood-leaflet.pdf
 .tmp-docs.html
 scripts/node_modules/
 app/node_modules/

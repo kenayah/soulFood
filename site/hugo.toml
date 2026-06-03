@@ -6,6 +6,30 @@ theme = "restaurant-hugo"
 [params]
 logo = "images/logo.webp"
 
+[[menu.main]]
+name = "Plates"
+URL = "slider"
+
+[[menu.main]]
+name = "About"
+URL = "about-us"
+
+[[menu.main]]
+name = "Blog"
+URL = "blog"
+
+[[menu.main]]
+name = "Menu"
+URL = "price"
+
+[[menu.main]]
+name = "Subscribe"
+URL = "subscribe"
+
+[[menu.main]]
+name = "Contact"
+URL = "contact-us"
+
 [[params.plugins.css]]
 URL = "css/bootstrap.min.css"
 [[params.plugins.css]]
