@@ -1,5 +1,5 @@
 name = "soulfood"
-main = "src/index.ts"
+main = "src/index.tsx"
 compatibility_date = "2025-01-01"
 
 [[d1_databases]]

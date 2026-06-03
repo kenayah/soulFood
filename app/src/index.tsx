@@ -11,8 +11,32 @@ import paymentsRoutes from "./features/payments/routes"
 import notificationsRoutes from "./features/notifications/routes"
 import adminRoutes from "./admin/routes"
 import { requireAuth } from "./auth/middleware"
+import { initDb } from "./lib/init-db"
+import type { D1Database } from "@cloudflare/workers-types"
 
-const app = new Hono()
+const app = new Hono<{ Bindings: { DB: D1Database } }>()
+
+// Run database migration on first request (dev-friendly)
+let dbInitRan = false
+app.use("*", async (c, next) => {
+  if (!dbInitRan) {
+    dbInitRan = true
+    const ok = await initDb(c.env.DB)
+    if (!ok) {
+      return c.html(
+        <html lang="en">
+          <head><title>SoulFood — DB Error</title></head>
+          <body style="font-family:sans-serif;margin:2em">
+            <h1>Database not initialized</h1>
+            <p>Run migrations first: <code>wrangler d1 execute DB --local --file=migrations/001_create_tables.sql</code></p>
+          </body>
+        </html>,
+        500,
+      )
+    }
+  }
+  await next()
+})
 
 app.use("*", logger())
 app.use("*", secureHeaders())
