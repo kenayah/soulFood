@@ -1,0 +1,46 @@
+name: Sync docs to GitHub Wiki
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["docs/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate wiki content
+        run: node scripts/sync-docs-to-wiki.mjs
+
+      - name: Clone current wiki
+        run: |
+          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kenayah/soulFood.wiki.git" .wiki-current
+
+      - name: Copy generated content into wiki
+        run: |
+          find .wiki-current -name "*.md" -not -path ".wiki-current/.git/*" -exec rm {} \;
+          find .wiki-current -type d -empty -not -path ".wiki-current/.git/*" -delete 2>/dev/null || true
+          cp -r .wiki/* .wiki-current/
+
+      - name: Commit and push
+        run: |
+          cd .wiki-current
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to sync"
+          else
+            git commit -m "Sync docs/ to wiki ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+            git push
+          fi
