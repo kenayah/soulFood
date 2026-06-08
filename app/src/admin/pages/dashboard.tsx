@@ -7,7 +7,7 @@ export async function dashboard(c: Context) {
   const stats = await getDashboardStats(db)
 
   return c.html(
-    <AdminLayout title="Dashboard">
+    <AdminLayout title="Dashboard" currentPath="/admin/dashboard">
       <h1 class="mb-4">Dashboard</h1>
       <div class="row mb-4">
         <div class="col-md-3">

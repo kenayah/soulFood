@@ -69,6 +69,19 @@ function generateSidebar() {
   return lines.join("\n")
 }
 
+function generateNav(index, total) {
+  const links = ["[🏠 Home](Home)"]
+  if (index > 0) {
+    const prevName = FILE_ORDER[index - 1][1].replace(/\.md$/, "")
+    links.push(`[◀ Previous](${prevName})`)
+  }
+  if (index < total - 1) {
+    const nextName = FILE_ORDER[index + 1][1].replace(/\.md$/, "")
+    links.push(`[Next ▶](${nextName})`)
+  }
+  return "\n\n---\n\n" + links.join(" · ")
+}
+
 function generateHome() {
   const readme = readFileSync(join(DOCS_DIR, "README.md"), "utf-8")
   const blocks = readme.split("## Quick Links")[0].trim()
@@ -84,7 +97,8 @@ function main() {
 
   const linkMap = buildLinkMap()
 
-  for (const [src, dst] of FILE_ORDER) {
+  for (let i = 0; i < FILE_ORDER.length; i++) {
+    const [src, dst] = FILE_ORDER[i]
     const srcPath = join(DOCS_DIR, src)
     if (!existsSync(srcPath)) {
       console.warn(`  WARN: ${src} not found, skipping`)
@@ -96,6 +110,7 @@ function main() {
 
     let content = readFileSync(srcPath, "utf-8")
     content = rewriteLinks(content, linkMap)
+    content += generateNav(i, FILE_ORDER.length)
     writeFileSync(dstPath, content)
     console.log(`  ${src} → ${dst}`)
   }

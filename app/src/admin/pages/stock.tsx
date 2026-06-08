@@ -8,7 +8,7 @@ export async function stock(c: Context) {
   const suppliers = await getSuppliers(db)
 
   return c.html(
-    <AdminLayout title="Stock">
+    <AdminLayout title="Stock" currentPath="/admin/stock">
       <h1 class="mb-4">Stock Management</h1>
 
       {c.req.query("adjusted") && <div class="alert alert-success">Stock adjusted.</div>}

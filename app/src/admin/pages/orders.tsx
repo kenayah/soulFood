@@ -23,7 +23,7 @@ export async function listOrders(c: Context) {
   const { orders } = await getOrders(db, { status, limit: 50 })
 
   return c.html(
-    <AdminLayout title="Orders">
+    <AdminLayout title="Orders" currentPath="/admin/orders">
       <h1 class="mb-4">Orders</h1>
       <div class="mb-3">
         <a href="/admin/orders" class="btn btn-sm btn-outline-secondary me-1">All</a>
@@ -81,7 +81,7 @@ export async function orderDetail(c: Context) {
     : null
 
   return c.html(
-    <AdminLayout title={"Order #" + order.id}>
+    <AdminLayout title={"Order #" + order.id} currentPath="/admin/orders">
       <h1 class="mb-4">Order #{order.id}</h1>
 
       {c.req.query("updated") && (

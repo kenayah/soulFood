@@ -11,7 +11,7 @@ export async function menu(c: Context) {
   const editItem = editItemId ? await getMenuItemById(db, parseInt(editItemId)) : null
 
   return c.html(
-    <AdminLayout title="Menu">
+    <AdminLayout title="Menu" currentPath="/admin/menu">
       <h1 class="mb-4">Menu Management</h1>
 
       {c.req.query("created") && <div class="alert alert-success">Created successfully.</div>}

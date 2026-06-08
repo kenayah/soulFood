@@ -1,6 +1,14 @@
 import type { Child } from "hono/jsx"
 
-export function AdminLayout({ title, children }: { title?: string; children: Child }) {
+const NAV_ITEMS = [
+  { label: "Dashboard", path: "/admin/dashboard" },
+  { label: "Orders", path: "/admin/orders" },
+  { label: "Menu", path: "/admin/menu" },
+  { label: "Stock", path: "/admin/stock" },
+  { label: "Reports", path: "/admin/reports" },
+]
+
+export function AdminLayout({ title, currentPath, children }: { title?: string; currentPath?: string; children: Child }) {
   return (
     <html lang="en">
       <head>
@@ -18,11 +26,16 @@ export function AdminLayout({ title, children }: { title?: string; children: Chi
             <a class="navbar-brand" href="/admin">SoulFood Admin</a>
             <div class="collapse navbar-collapse">
               <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="/admin/orders">Orders</a></li>
-                <li class="nav-item"><a class="nav-link" href="/admin/menu">Menu</a></li>
-                <li class="nav-item"><a class="nav-link" href="/admin/stock">Stock</a></li>
-                <li class="nav-item"><a class="nav-link" href="/admin/reports">Reports</a></li>
+                {NAV_ITEMS.map((item) => (
+                  <li class="nav-item">
+                    <a
+                      class={"nav-link" + (currentPath?.startsWith(item.path) ? " active" : "")}
+                      href={item.path}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
