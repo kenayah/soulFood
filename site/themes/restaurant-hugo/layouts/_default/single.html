@@ -9,7 +9,7 @@
                 <img class="img-responsive post-thumb d-inline-block" src="{{ .Params.image | absURL }}" alt="blog-image">
                 <h1 class="post-title">{{ .Title }}</h1>
                 <ul class="list-inline mb-50 post-meta">
-                    <li class="list-inline-item">{{ .Params.author }}</li>
+                    {{ with .Params.author }}<li class="list-inline-item">{{ . }}</li>{{ end }}
                     <li class="list-inline-item">{{ dateFormat "Monday, Jan 2, 2006" .Date }}</li>
                 </ul>
             </div>
