@@ -38,7 +38,6 @@ gallery:
 about:
   enable : true
   image : "images/cooker-img-1.webp"
-  # title : "The Feel & Taste of <span> Ikhaya </span> , eish" 
   title : "The Taste of South African <span> Comfort Meal </span> on a Plate" 
   description : "Ikhaya</br>The unmistakable feel & taste of home."
   
@@ -122,18 +121,22 @@ pricing:
   - title: "Umqombothi"
     category: "Drinks"
     description: "Traditional African beer from maize, sorghum, yeast, water"
+    price : "R 26.00"
 
   - title: "Rooibos Tea"
     category: "Hot Beverages"
     description: "Caffeine-free red bush tea from Cederberg Mountains, drunk black with honey or lemon"
+    price : "R 16.00"
 
   - title: "Kloof Coffee"
     category: "Hot Beverages"
     description: "Freshly brewed locally roasted coffee, served black or with milk"
+    price : "R 21.00"
 
   - title: "Rock Shandy"
     category: "Drinks"
     description: "Lemonade, soda water, Angostura bitters and lemon slice, with ice"
+    price : "R 26.00"
 
   - title: "Spring Water"
     category: "Drinks"
