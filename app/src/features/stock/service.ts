@@ -1,6 +1,13 @@
 import type { D1Database } from "@cloudflare/workers-types"
 import { getDb, queryAll, queryOne, execute } from "../../lib/d1"
 
+export interface StockCategoryRow {
+  id: number
+  name: string
+  description: string | null
+  sort_order: number
+}
+
 export interface IngredientRow {
   id: number
   name: string
@@ -11,17 +18,24 @@ export interface IngredientRow {
   reorder_quantity: number | null
   unit_cost: number | null
   supplier_id: number | null
+  category_id: number | null
+  category_name: string | null
   created_at: string
 }
 
+export async function getStockCategories(db: D1Database): Promise<StockCategoryRow[]> {
+  return queryAll<StockCategoryRow>(db, "SELECT * FROM stock_categories ORDER BY sort_order")
+}
+
 export async function getIngredients(db: D1Database, belowMin?: boolean): Promise<IngredientRow[]> {
-  if (belowMin) {
-    return queryAll<IngredientRow>(
-      db,
-      "SELECT * FROM ingredients WHERE current_stock <= min_stock_level ORDER BY name",
-    )
-  }
-  return queryAll<IngredientRow>(db, "SELECT * FROM ingredients ORDER BY name")
+  const sql = belowMin
+    ? `SELECT i.*, sc.name as category_name FROM ingredients i
+       LEFT JOIN stock_categories sc ON i.category_id = sc.id
+       WHERE i.current_stock <= i.min_stock_level ORDER BY sc.sort_order, i.name`
+    : `SELECT i.*, sc.name as category_name FROM ingredients i
+       LEFT JOIN stock_categories sc ON i.category_id = sc.id
+       ORDER BY sc.sort_order, i.name`
+  return queryAll<IngredientRow>(db, sql)
 }
 
 export async function createIngredient(
@@ -35,12 +49,13 @@ export async function createIngredient(
     reorderQuantity?: number
     unitCost?: number
     supplierId?: number
+    categoryId?: number
   },
 ): Promise<IngredientRow | null> {
   return queryOne<IngredientRow>(
     db,
-    `INSERT INTO ingredients (name, unit, current_stock, min_stock_level, max_stock_level, reorder_quantity, unit_cost, supplier_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
+    `INSERT INTO ingredients (name, unit, current_stock, min_stock_level, max_stock_level, reorder_quantity, unit_cost, supplier_id, category_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
     data.name,
     data.unit,
     data.currentStock,
@@ -49,6 +64,7 @@ export async function createIngredient(
     data.reorderQuantity ?? null,
     data.unitCost ?? null,
     data.supplierId ?? null,
+    data.categoryId ?? null,
   )
 }
 
@@ -121,6 +137,7 @@ export async function updateIngredient(
     reorderQuantity: number
     unitCost: number
     supplierId: number
+    categoryId: number
   }>,
 ): Promise<IngredientRow | null> {
   const sets: string[] = []
@@ -134,6 +151,7 @@ export async function updateIngredient(
   if (data.reorderQuantity !== undefined) { sets.push("reorder_quantity = ?"); params.push(data.reorderQuantity) }
   if (data.unitCost !== undefined) { sets.push("unit_cost = ?"); params.push(data.unitCost) }
   if (data.supplierId !== undefined) { sets.push("supplier_id = ?"); params.push(data.supplierId) }
+  if (data.categoryId !== undefined) { sets.push("category_id = ?"); params.push(data.categoryId) }
 
   if (sets.length === 0) return queryOne<IngredientRow>(db, "SELECT * FROM ingredients WHERE id = ?", id)
 

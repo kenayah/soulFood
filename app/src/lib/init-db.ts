@@ -23,11 +23,14 @@ const STATEMENTS: string[] = [
   "CREATE INDEX IF NOT EXISTS idx_notifications_ack ON notifications(acknowledged)",
   "CREATE TABLE IF NOT EXISTS stock_movement_log (id INTEGER PRIMARY KEY AUTOINCREMENT, ingredient_id INTEGER NOT NULL REFERENCES ingredients(id), adjustment REAL NOT NULL, stock_before REAL NOT NULL, stock_after REAL NOT NULL, reason TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')))",
   "CREATE INDEX IF NOT EXISTS idx_stock_movement_ingredient ON stock_movement_log(ingredient_id)",
+  "CREATE TABLE IF NOT EXISTS stock_categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, description TEXT, sort_order INTEGER NOT NULL DEFAULT 0)",
+  "CREATE INDEX IF NOT EXISTS idx_ingredients_category ON ingredients(category_id)",
 ]
 
 let migrationRan = false
 let starchColMigrated = false
 let customersMigrated = false
+let stockCategoriesMigrated = false
 
 async function ensureStarchColumn(db: D1Database): Promise<void> {
   if (starchColMigrated) return
@@ -64,6 +67,34 @@ async function ensureCustomersTable(db: D1Database): Promise<void> {
   }
 }
 
+async function ensureStockCategories(db: D1Database): Promise<void> {
+  if (stockCategoriesMigrated) return
+  stockCategoriesMigrated = true
+  try {
+    await db.prepare("ALTER TABLE ingredients ADD COLUMN category_id INTEGER REFERENCES stock_categories(id)").run()
+    console.log("Added category_id to ingredients")
+  } catch {
+    // Column already exists — ignore
+  }
+
+  const existing = await db.prepare("SELECT COUNT(*) as count FROM stock_categories").first<{ count: number }>()
+  if (!existing || existing.count === 0) {
+    const categories = [
+      { name: "Ingredients", description: "Food items, raw materials, cooking components", sort: 1 },
+      { name: "Utensils", description: "Cutlery, cooking tools, knives, reusable kitchen tools", sort: 2 },
+      { name: "Disposables", description: "Containers, plates, cups, serviettes, packaging, single-use items", sort: 3 },
+      { name: "Hygiene", description: "Wipes, cleaning supplies, sanitizers, hand soap", sort: 4 },
+      { name: "Utilities", description: "Gas, electricity, water — operational utilities", sort: 5 },
+    ]
+    for (const cat of categories) {
+      await db.prepare(
+        "INSERT INTO stock_categories (name, description, sort_order) VALUES (?, ?, ?)",
+      ).bind(cat.name, cat.description, cat.sort).run()
+    }
+    console.log("Seeded stock categories")
+  }
+}
+
 export async function initDb(db: D1Database): Promise<boolean> {
   if (migrationRan) return true
   migrationRan = true
@@ -73,6 +104,7 @@ export async function initDb(db: D1Database): Promise<boolean> {
     }
     await ensureStarchColumn(db)
     await ensureCustomersTable(db)
+    await ensureStockCategories(db)
     console.log("Database migration applied successfully")
     return true
   } catch (err) {

@@ -6,13 +6,17 @@ Stock management tracks ingredients and supplies needed for dish preparation, en
 
 ## Inventory Categories
 
-| Category | Examples |
+Stock items are organized into 5 categories (seeded automatically on first run):
+
+| Category | What It Includes |
 |---|---|
-| **Ingredients** | Meat, vegetables, spices, oils, grains |
-| **Packaging** | Takeaway containers, bags, labels |
-| **Disposables** | Napkins, cutlery, gloves |
-| **Cleaning** | Sanitizer, detergents, cloths |
-| **Tools** | Foil, baking paper, ties |
+| **Ingredients** | All food items, raw materials, cooking components |
+| **Utensils** | Cutlery, cooking tools (spatulas, ladles, spoons), knives, reusable kitchen tools |
+| **Disposables** | Containers, plates, cups, serviettes/napkins, packaging materials, single-use items |
+| **Hygiene** | Wipes, cleaning supplies, sanitizers, hand soap |
+| **Utilities** | Gas, electricity, water — operational utilities |
+
+The admin stock page includes category tabs for quick filtering and a category dropdown on the add/edit ingredient forms.
 
 ## Stock Level Management
 

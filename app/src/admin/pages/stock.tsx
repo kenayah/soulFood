@@ -2,6 +2,7 @@ import type { Context } from "hono"
 import { AdminLayout } from "../layout"
 import {
   getIngredients,
+  getStockCategories,
   getSuppliers,
   createIngredient,
   adjustStock,
@@ -11,8 +12,14 @@ import {
 
 export async function stock(c: Context) {
   const db = c.env.DB
+  const categories = await getStockCategories(db)
   const ingredients = await getIngredients(db)
   const suppliers = await getSuppliers(db)
+
+  const categoryFilter = c.req.query("category")
+  const filteredIngredients = categoryFilter
+    ? ingredients.filter((i) => i.category_id === parseInt(categoryFilter))
+    : ingredients
 
   const viewMovements = c.req.query("movements")
   const movements = viewMovements
@@ -41,12 +48,21 @@ export async function stock(c: Context) {
             <>
               <div class="flex justify-between items-center mb-3">
                 <h5 class="card-title">Edit: {editIngredient.name}</h5>
-                <a href="/admin/stock" class="btn btn-sm btn-ghost">Cancel</a>
+                <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="btn btn-sm btn-ghost">Cancel</a>
               </div>
-              <form method="post" action={"/admin/stock/ingredient/" + editIngredient.id + "/update"} class="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <form method="post" action={"/admin/stock/ingredient/" + editIngredient.id + "/update" + (categoryFilter ? "?category=" + categoryFilter : "")} class="grid grid-cols-1 md:grid-cols-5 gap-3">
                 <label class="form-control">
                   <span class="label-text">Name</span>
                   <input name="name" class="input input-bordered input-sm w-full" value={editIngredient.name} required />
+                </label>
+                <label class="form-control">
+                  <span class="label-text">Category</span>
+                  <select name="categoryId" class="select select-bordered select-sm w-full">
+                    <option value="">Uncategorized</option>
+                    {categories.map((cat) => (
+                      <option value={cat.id} selected={cat.id === editIngredient.category_id}>{cat.name}</option>
+                    ))}
+                  </select>
                 </label>
                 <label class="form-control">
                   <span class="label-text">Unit</span>
@@ -81,19 +97,28 @@ export async function stock(c: Context) {
                     ))}
                   </select>
                 </label>
-                <div class="md:col-span-4 flex gap-2 mt-2">
+                <div class="md:col-span-5 flex gap-2 mt-2">
                   <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                  <a href="/admin/stock" class="btn btn-ghost btn-sm">Cancel</a>
+                  <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="btn btn-ghost btn-sm">Cancel</a>
                 </div>
               </form>
             </>
           ) : (
             <>
-              <h5 class="card-title mb-3">New Ingredient</h5>
-              <form method="post" action="/admin/stock/ingredient" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+              <h5 class="card-title mb-3">New Stock Item</h5>
+              <form method="post" action="/admin/stock/ingredient" class="grid grid-cols-1 md:grid-cols-6 gap-3">
                 <label class="form-control">
                   <span class="label-text">Name</span>
                   <input name="name" class="input input-bordered input-sm w-full" required />
+                </label>
+                <label class="form-control">
+                  <span class="label-text">Category</span>
+                  <select name="categoryId" class="select select-bordered select-sm w-full">
+                    <option value="">Select...</option>
+                    {categories.map((cat) => (
+                      <option value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
                 </label>
                 <label class="form-control">
                   <span class="label-text">Unit</span>
@@ -111,7 +136,7 @@ export async function stock(c: Context) {
                   <span class="label-text">Max level</span>
                   <input name="maxStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" placeholder="Auto-calc reorder" />
                 </label>
-                <div class="md:col-span-5 flex gap-2">
+                <div class="md:col-span-6 flex gap-2">
                   <label class="form-control flex-1">
                     <span class="label-text">Supplier</span>
                     <select name="supplierId" class="select select-bordered select-sm w-full">
@@ -135,12 +160,22 @@ export async function stock(c: Context) {
         </div>
       </div>
 
-      <h3 class="text-lg font-semibold mb-2">Ingredients</h3>
+      <div class="flex items-center gap-3 mb-3">
+        <h3 class="text-lg font-semibold">Stock Items</h3>
+        <div class="tabs tabs-boxed">
+          <a class={"tab tab-sm" + (!categoryFilter ? " tab-active" : "")} href="/admin/stock">All</a>
+          {categories.map((cat) => (
+            <a class={"tab tab-sm" + (categoryFilter === String(cat.id) ? " tab-active" : "")} href={"/admin/stock?category=" + cat.id}>{cat.name}</a>
+          ))}
+        </div>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="table table-zebra">
           <thead>
             <tr>
               <th>Name</th>
+              <th>Category</th>
               <th>Unit</th>
               <th>Stock</th>
               <th>Min</th>
@@ -152,7 +187,7 @@ export async function stock(c: Context) {
             </tr>
           </thead>
           <tbody>
-            {ingredients.map((ing) => {
+            {filteredIngredients.map((ing) => {
               const isLow = ing.current_stock <= ing.min_stock_level
               const suggestedReorder = ing.max_stock_level
                 ? Math.max(0, ing.max_stock_level - ing.current_stock)
@@ -160,6 +195,7 @@ export async function stock(c: Context) {
               return (
                 <tr class={isLow ? "bg-error/10" : ""}>
                   <td>{ing.name}</td>
+                  <td><span class="badge badge-ghost badge-sm">{ing.category_name ?? "—"}</span></td>
                   <td>{ing.unit}</td>
                   <td class="font-mono">{ing.current_stock}</td>
                   <td class="font-mono">{ing.min_stock_level}</td>
@@ -185,7 +221,7 @@ export async function stock(c: Context) {
                     </form>
                   </td>
                   <td>
-                    <a href={"/admin/stock?edit=" + ing.id} class="btn btn-sm btn-ghost">Edit</a>
+                    <a href={"/admin/stock?edit=" + ing.id + (categoryFilter ? "&category=" + categoryFilter : "")} class="btn btn-sm btn-ghost">Edit</a>
                     <a href={"/admin/stock?movements=" + ing.id} class="btn btn-sm btn-ghost">Log</a>
                   </td>
                 </tr>
@@ -254,6 +290,7 @@ export async function createIngredientHandler(c: Context) {
     minStockLevel: parseFloat(body.minStockLevel as string) || 0,
     maxStockLevel: body.maxStockLevel ? parseFloat(body.maxStockLevel as string) : undefined,
     reorderQuantity: body.reorderQuantity ? parseFloat(body.reorderQuantity as string) : undefined,
+    categoryId: body.categoryId ? parseInt(body.categoryId as string) : undefined,
     supplierId: body.supplierId ? parseInt(body.supplierId as string) : undefined,
   })
   return c.redirect("/admin/stock?created=1")
@@ -282,6 +319,7 @@ export async function updateIngredientHandler(c: Context) {
   const db = c.env.DB
   const id = parseInt(c.req.param("id")!)
   const body = await c.req.parseBody()
+  const categoryFilter = c.req.query("category")
   await updateIngredient(db, id, {
     name: body.name as string,
     unit: body.unit as string,
@@ -290,7 +328,8 @@ export async function updateIngredientHandler(c: Context) {
     maxStockLevel: body.maxStockLevel ? parseFloat(body.maxStockLevel as string) : undefined,
     reorderQuantity: body.reorderQuantity ? parseFloat(body.reorderQuantity as string) : undefined,
     unitCost: body.unitCost ? parseFloat(body.unitCost as string) : undefined,
+    categoryId: body.categoryId ? parseInt(body.categoryId as string) : undefined,
     supplierId: body.supplierId ? parseInt(body.supplierId as string) : undefined,
   })
-  return c.redirect("/admin/stock?updated=1")
+  return c.redirect("/admin/stock?updated=1" + (categoryFilter ? "&category=" + categoryFilter : ""))
 }
