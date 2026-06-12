@@ -32,18 +32,22 @@ export async function createIngredient(
     currentStock: number
     minStockLevel: number
     maxStockLevel?: number
+    reorderQuantity?: number
+    unitCost?: number
     supplierId?: number
   },
 ): Promise<IngredientRow | null> {
   return queryOne<IngredientRow>(
     db,
-    `INSERT INTO ingredients (name, unit, current_stock, min_stock_level, max_stock_level, supplier_id)
-     VALUES (?, ?, ?, ?, ?, ?) RETURNING *`,
+    `INSERT INTO ingredients (name, unit, current_stock, min_stock_level, max_stock_level, reorder_quantity, unit_cost, supplier_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
     data.name,
     data.unit,
     data.currentStock,
     data.minStockLevel,
     data.maxStockLevel ?? null,
+    data.reorderQuantity ?? null,
+    data.unitCost ?? null,
     data.supplierId ?? null,
   )
 }
@@ -52,6 +56,7 @@ export async function adjustStock(
   db: D1Database,
   ingredientId: number,
   adjustment: number,
+  reason?: string,
 ): Promise<IngredientRow | null> {
   const ingredient = await queryOne<IngredientRow>(
     db,
@@ -70,7 +75,72 @@ export async function adjustStock(
     ingredientId,
   )
 
+  await execute(
+    db,
+    `INSERT INTO stock_movement_log (ingredient_id, adjustment, stock_before, stock_after, reason)
+     VALUES (?, ?, ?, ?, ?)`,
+    ingredientId,
+    adjustment,
+    ingredient.current_stock,
+    newStock,
+    reason ?? null,
+  )
+
   return queryOne<IngredientRow>(db, "SELECT * FROM ingredients WHERE id = ?", ingredientId)
+}
+
+export async function getStockMovements(
+  db: D1Database,
+  ingredientId: number,
+  limit: number = 10,
+): Promise<{
+  id: number
+  adjustment: number
+  stock_before: number
+  stock_after: number
+  reason: string | null
+  created_at: string
+}[]> {
+  return queryAll(
+    db,
+    `SELECT * FROM stock_movement_log WHERE ingredient_id = ? ORDER BY created_at DESC LIMIT ?`,
+    ingredientId,
+    limit,
+  )
+}
+
+export async function updateIngredient(
+  db: D1Database,
+  id: number,
+  data: Partial<{
+    name: string
+    unit: string
+    currentStock: number
+    minStockLevel: number
+    maxStockLevel: number
+    reorderQuantity: number
+    unitCost: number
+    supplierId: number
+  }>,
+): Promise<IngredientRow | null> {
+  const sets: string[] = []
+  const params: unknown[] = []
+
+  if (data.name !== undefined) { sets.push("name = ?"); params.push(data.name) }
+  if (data.unit !== undefined) { sets.push("unit = ?"); params.push(data.unit) }
+  if (data.currentStock !== undefined) { sets.push("current_stock = ?"); params.push(data.currentStock) }
+  if (data.minStockLevel !== undefined) { sets.push("min_stock_level = ?"); params.push(data.minStockLevel) }
+  if (data.maxStockLevel !== undefined) { sets.push("max_stock_level = ?"); params.push(data.maxStockLevel) }
+  if (data.reorderQuantity !== undefined) { sets.push("reorder_quantity = ?"); params.push(data.reorderQuantity) }
+  if (data.unitCost !== undefined) { sets.push("unit_cost = ?"); params.push(data.unitCost) }
+  if (data.supplierId !== undefined) { sets.push("supplier_id = ?"); params.push(data.supplierId) }
+
+  if (sets.length === 0) return queryOne<IngredientRow>(db, "SELECT * FROM ingredients WHERE id = ?", id)
+
+  sets.push("updated_at = datetime('now')")
+  params.push(id)
+  await execute(db, `UPDATE ingredients SET ${sets.join(", ")} WHERE id = ?`, ...params)
+  return queryOne<IngredientRow>(db, "SELECT * FROM ingredients WHERE id = ?", id)
 }
 
 export async function getSuppliers(db: D1Database): Promise<{
@@ -145,4 +215,112 @@ export async function createPurchaseOrder(
   }
 
   return queryOne(db, "SELECT * FROM purchase_orders WHERE id = ?", po.id)
+}
+
+export async function getPurchaseOrderById(
+  db: D1Database,
+  id: number,
+): Promise<unknown | null> {
+  return queryOne(
+    db,
+    `SELECT po.*, s.name as supplier_name
+     FROM purchase_orders po
+     JOIN suppliers s ON po.supplier_id = s.id
+     WHERE po.id = ?`,
+    id,
+  )
+}
+
+export async function getPurchaseOrderItems(
+  db: D1Database,
+  purchaseOrderId: number,
+): Promise<{
+  id: number
+  ingredient_id: number
+  ingredient_name: string
+  quantity_ordered: number
+  quantity_received: number
+  unit_price: number
+}[]> {
+  return queryAll(
+    db,
+    `SELECT poi.*, i.name as ingredient_name
+     FROM purchase_order_items poi
+     JOIN ingredients i ON poi.ingredient_id = i.id
+     WHERE poi.purchase_order_id = ?`,
+    purchaseOrderId,
+  )
+}
+
+export async function receivePurchaseOrder(
+  db: D1Database,
+  id: number,
+): Promise<unknown | null> {
+  const po = await queryOne<{ id: number; status: string }>(
+    db, "SELECT id, status FROM purchase_orders WHERE id = ?", id,
+  )
+  if (!po) return null
+  if (po.status === "received") throw new Error("Purchase order already received")
+
+  const items = await queryAll<{
+    ingredient_id: number
+    quantity_ordered: number
+    quantity_received: number
+    unit_price: number
+  }>(
+    db,
+    "SELECT ingredient_id, quantity_ordered, quantity_received, unit_price FROM purchase_order_items WHERE purchase_order_id = ?",
+    id,
+  )
+
+  for (const item of items) {
+    const qtyToReceive = item.quantity_ordered - item.quantity_received
+    if (qtyToReceive > 0) {
+      await adjustStock(db, item.ingredient_id, qtyToReceive, `Purchase order #${id} received`)
+    }
+  }
+
+  await execute(
+    db,
+    `UPDATE purchase_order_items SET quantity_received = quantity_ordered
+     WHERE purchase_order_id = ?`,
+    id,
+  )
+
+  await execute(
+    db,
+    "UPDATE purchase_orders SET status = 'received', received_at = datetime('now') WHERE id = ?",
+    id,
+  )
+
+  return getPurchaseOrderById(db, id)
+}
+
+export async function updateSupplier(
+  db: D1Database,
+  id: number,
+  data: Partial<{
+    name: string
+    contactPerson: string
+    phone: string
+    email: string
+    leadTimeDays: number
+    active: boolean
+  }>,
+): Promise<unknown | null> {
+  const sets: string[] = []
+  const params: unknown[] = []
+
+  if (data.name !== undefined) { sets.push("name = ?"); params.push(data.name) }
+  if (data.contactPerson !== undefined) { sets.push("contact_person = ?"); params.push(data.contactPerson) }
+  if (data.phone !== undefined) { sets.push("phone = ?"); params.push(data.phone) }
+  if (data.email !== undefined) { sets.push("email = ?"); params.push(data.email) }
+  if (data.leadTimeDays !== undefined) { sets.push("lead_time_days = ?"); params.push(data.leadTimeDays) }
+  if (data.active !== undefined) { sets.push("active = ?"); params.push(data.active ? 1 : 0) }
+
+  if (sets.length === 0) return queryOne(db, "SELECT * FROM suppliers WHERE id = ?", id)
+
+  params.push(id)
+  await execute(db, `UPDATE suppliers SET ${sets.join(", ")} WHERE id = ?`, ...params)
+  return queryOne(db, "SELECT * FROM suppliers WHERE id = ?", id)
 }

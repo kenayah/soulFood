@@ -50,6 +50,8 @@ export const ingredientSchema = z.object({
   currentStock: z.number().default(0),
   minStockLevel: z.number().default(0),
   maxStockLevel: z.number().optional(),
+  reorderQuantity: z.number().optional(),
+  unitCost: z.number().optional(),
   supplierId: z.number().optional(),
 })
 

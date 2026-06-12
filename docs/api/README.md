@@ -230,6 +230,13 @@ GET /api/stock/ingredients?belowMin=true
 Authorization: Bearer <token>
 ```
 
+### Get Ingredient by ID
+
+```http
+GET /api/stock/ingredients/5
+Authorization: Bearer <token>
+```
+
 ### Adjust Stock
 
 ```http
@@ -241,6 +248,13 @@ Content-Type: application/json
   "adjustment": -2,
   "reason": "order_fulfillment"
 }
+```
+
+### Stock Movement History
+
+```http
+GET /api/stock/ingredients/5/history
+Authorization: Bearer <token>
 ```
 
 ## Report Endpoints

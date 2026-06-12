@@ -6,9 +6,11 @@ import { loginForm, login } from "./pages/login"
 import { dashboard } from "./pages/dashboard"
 import { listOrders, orderDetail, updateStatus } from "./pages/orders"
 import { menu, createCategoryHandler, toggleCategory, createItemHandler, updateItemHandler, deleteItemHandler } from "./pages/menu"
-import { stock, createIngredientHandler, adjustStockHandler } from "./pages/stock"
+import { stock, createIngredientHandler, adjustStockHandler, updateIngredientHandler } from "./pages/stock"
 import { reports } from "./pages/reports"
 import { customers } from "./pages/customers"
+import { suppliers, createSupplierHandler, updateSupplierHandler } from "./pages/suppliers"
+import { purchaseOrders, createPurchaseOrderHandler, receivePurchaseOrderHandler } from "./pages/purchase-orders"
 
 type Bindings = { DB: D1Database; ADMIN_TOKEN?: string }
 
@@ -34,8 +36,15 @@ app.post("/menu/item/:id/delete", deleteItemHandler)
 app.get("/stock", stock)
 app.post("/stock/ingredient", createIngredientHandler)
 app.post("/stock/ingredient/:id/adjust", adjustStockHandler)
+app.post("/stock/ingredient/:id/update", updateIngredientHandler)
 app.get("/reports", reports)
 app.get("/customers", customers)
+app.get("/suppliers", suppliers)
+app.post("/suppliers", createSupplierHandler)
+app.post("/suppliers/:id/update", updateSupplierHandler)
+app.get("/purchase-orders", purchaseOrders)
+app.post("/purchase-orders", createPurchaseOrderHandler)
+app.post("/purchase-orders/:id/receive", receivePurchaseOrderHandler)
 
 app.get("/", (c) => c.redirect("/dashboard"))
 

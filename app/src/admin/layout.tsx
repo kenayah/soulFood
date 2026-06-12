@@ -7,6 +7,8 @@ const NAV_ITEMS = [
   { label: "Stock", path: "/admin/stock" },
   { label: "Customers", path: "/admin/customers" },
   { label: "Reports", path: "/admin/reports" },
+  { label: "Suppliers", path: "/admin/suppliers" },
+  { label: "PO", path: "/admin/purchase-orders" },
 ]
 
 const TW_CONFIG = `
