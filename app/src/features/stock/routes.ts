@@ -6,6 +6,7 @@ import {
   getIngredients,
   createIngredient,
   adjustStock,
+  getStockMovements,
   getSuppliers,
   createSupplier,
   getPurchaseOrders,
@@ -52,6 +53,14 @@ app.patch("/ingredients/:id/stock", async (c) => {
   } catch (e) {
     return c.json({ error: (e as Error).message }, 400)
   }
+})
+
+app.get("/ingredients/:id/history", async (c) => {
+  const id = parseInt(c.req.param("id"))
+  const db = getDb(c.env)
+  const limit = parseInt(c.req.query("limit") ?? "20")
+  const movements = await getStockMovements(db, id, limit)
+  return c.json(movements)
 })
 
 app.get("/suppliers", async (c) => {
