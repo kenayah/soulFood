@@ -11,35 +11,40 @@ Online takeaway management system for a South African comfort food business.
 
 ## Last Session Notes
 
-**Date:** June 9, 2026
+**Date:** June 10, 2026
 **Branch:** `dev`
 
 Completed:
-- Gallery slider converted to card layout with captions and descriptions
-- Updated `site/data/homepage.yml` — images changed from string list to objects with `image`, `caption`, `description`
-- Updated `site/layouts/partials/gallery.html` → `site/themes/restaurant-hugo/layouts/partials/gallery.html` — wrapped each slide in `.slide-item` with `.slide-caption`
-- Added card CSS (`slide-item`, `.slide-caption` styles) to `site/static/css/main.css`
-- Fixed blog: homepage was showing 0 posts because `site.Params.main_sections` was undefined; changed filter to `where site.RegularPages "Type" "post"`
-- Fixed blog listing page pagination scoped to posts only (was paginating all regular pages)
-- Fixed 4 broken blog post image paths (wrong filenames/extensions: .png→.jpg, missing blog-img-1.jpg→blog-img-2.jpg)
-- Made `.Params.author` conditional in single page template to avoid empty markup
-- Added cart drawer (slide-in from right) with:
-  - `site/static/js/cart.js` — localStorage cart with add/remove/qty/total, WhatsApp order via `wa.me`
-  - `site/layouts/partials/cart-drawer.html` — drawer UI with empty state, item list, total, Place Order
-  - `site/layouts/partials/food-menu.html` — override with "Add to Cart" buttons on each priced item
-  - `site/layouts/_default/baseof.html` — override to include drawer + cart.js on all pages
-  - Cart icon with count badge in navbar (`site/layouts/partials/header.html`)
-  - Cart CSS (drawer, items, buttons, badge) appended to `site/static/css/main.css`
-- Split "Starch Options as Extra" into individual clickable items (Creamy Samp, Samp & Beans, Fried Savoury Rice, Plain Rice — each R 26.00)
-- Add to Cart button hidden on items without numeric prices (e.g. "Market Price")
-- Menu organized by category: Main Course (first 6 items), Side Dish (remaining 6)
-  - Category headings render as `<h3>` subheadings
-  - Categories with no items (Dessert) are skipped — ready for later addition
-- Added Drinks category with 3 non-alcoholic items: Umqombothi, Rooibos Tea, Rock Shandy (no price yet)
+- Seeded local D1 database with 5 categories (Main Course, Side Dish, Dessert, Hot Beverages, Drinks) and 17 menu items matching the Hugo frontend menu
+- Created `app/seed.sql` for reproducible seeding
+- Added `npm run seed:local` and `npm run seed:local:default` scripts
+- Connected cart Place Order to backend API (`POST /api/orders`):
+  - Checkout form with name, phone, address, notes fields slides into cart drawer
+  - Submits order to API then opens WhatsApp with confirmation + order #
+  - Clears cart on success, shows inline error on failure
+- Added numeric `id` field to each `pricing_item` in `site/data/homepage.yml` (matching DB seed IDs)
+- Updated `food-menu.html` to use `.id` for `data-id` attribute
+- Fixed prices in DB seed (Kloof Coffee R21, Rock Shandy R26) to match YAML
+- Added `site/hugo.toml` param `apiBaseURL` and JS global `SOULFOOD_API`
+- Updated seed to use `INSERT OR REPLACE` to handle re-seeds
+- Menu now fetched dynamically from `GET /api/public/menu` (JS fetch + render in `menu.js`)
+- Added `starch` column to `menu_items` table (migration 002)
+- Created public API endpoint at `/api/public/menu` returning categories with items
+- Replaced static Hugo-rendered menu with JS-driven dynamic container
+- Added `image` and `starch` fields to admin menu item create/edit forms + API routes + validators + service layer
+- Updated docs/ (schema, API reference, getting-started, features)
+- Starch choice now prompted client-side at add-to-cart: items with "or" in their starch field (e.g. "Creamy Samp or Steamed Bread") show a picker modal -> chosen starch saved per cart item -> displayed in cart -> included in order payload & WhatsApp message. Cart item identity keyed on `id::starch` so same item with different starch choices are separate line items.
+- Created `customers` table with unique index on phone (migration 003 + init-db.ts)
+- Added `customer_id` column to `orders` table referencing `customers(id)`
+- Order API now upserts customer by phone on every order (creates or updates name/address/notes, increments `total_orders`, updates `last_order_at`)
+- Frontend saves name/phone/address/notes to `localStorage` (`soulfood_checkout`) after successful order; pre-fills checkout form on next visit
 
 Priorities:
-- Hugo site still has deprecation warnings: `.Site.LanguageCode` → `Site.Language.Locale`, `.Site.Data` → `hugo.Data`
-- See `.opencode/notes.md` for specific file-level TODOs
+- Before deployment: update `apiBaseURL` in `site/hugo.toml` to production Workers URL
+
+Priorities:
+- Hugo site deprecation warnings (`.Site.LanguageCode`, `.Site.Data`) — already fixed in templates
+- Before deployment: update `apiBaseURL` in `site/hugo.toml` to production Workers URL
 
 ## Useful Commands
 

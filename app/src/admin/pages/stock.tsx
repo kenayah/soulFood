@@ -9,85 +9,88 @@ export async function stock(c: Context) {
 
   return c.html(
     <AdminLayout title="Stock" currentPath="/admin/stock">
-      <h1 class="mb-4">Stock Management</h1>
+      <h1 class="text-2xl font-bold mb-4">Stock Management</h1>
 
-      {c.req.query("adjusted") && <div class="alert alert-success">Stock adjusted.</div>}
-      {c.req.query("created") && <div class="alert alert-success">Ingredient created.</div>}
+      {c.req.query("adjusted") && <div class="alert alert-success mb-4">Stock adjusted.</div>}
+      {c.req.query("created") && <div class="alert alert-success mb-4">Ingredient created.</div>}
 
-      <div class="row mb-4">
-        <div class="col-md-5">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">New Ingredient</h5>
-              <form method="post" action="/admin/stock/ingredient">
-                <div class="mb-2">
-                  <input name="name" class="form-control" placeholder="Ingredient name" required />
-                </div>
-                <div class="row">
-                  <div class="col-4 mb-2">
-                    <input name="unit" class="form-control" placeholder="Unit" defaultValue="pieces" />
-                  </div>
-                  <div class="col-4 mb-2">
-                    <input name="currentStock" type="number" step="0.01" class="form-control" placeholder="Stock" defaultValue="0" />
-                  </div>
-                  <div class="col-4 mb-2">
-                    <input name="minStockLevel" type="number" step="0.01" class="form-control" placeholder="Min level" defaultValue="0" />
-                  </div>
-                </div>
-                <div class="mb-2">
-                  <select name="supplierId" class="form-select">
-                    <option value="">No supplier</option>
-                    {suppliers.map((s) => (
-                      <option value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm">Add Ingredient</button>
-              </form>
+      <div class="card bg-base-100 shadow mb-6 max-w-md">
+        <div class="card-body">
+          <h5 class="card-title">New Ingredient</h5>
+          <form method="post" action="/admin/stock/ingredient">
+            <label class="form-control w-full mb-2">
+              <span class="label-text">Name</span>
+              <input name="name" class="input input-bordered w-full" required />
+            </label>
+            <div class="grid grid-cols-3 gap-2 mb-2">
+              <label class="form-control">
+                <span class="label-text">Unit</span>
+                <input name="unit" class="input input-bordered w-full" defaultValue="pieces" />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Stock</span>
+                <input name="currentStock" type="number" step="0.01" class="input input-bordered w-full" defaultValue="0" />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Min level</span>
+                <input name="minStockLevel" type="number" step="0.01" class="input input-bordered w-full" defaultValue="0" />
+              </label>
             </div>
-          </div>
+            <label class="form-control w-full mb-3">
+              <span class="label-text">Supplier</span>
+              <select name="supplierId" class="select select-bordered w-full">
+                <option value="">No supplier</option>
+                {suppliers.map((s) => (
+                  <option value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </label>
+            <button type="submit" class="btn btn-primary btn-sm">Add Ingredient</button>
+          </form>
         </div>
       </div>
 
-      <h3>Ingredients</h3>
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Unit</th>
-            <th>Stock</th>
-            <th>Min</th>
-            <th>Status</th>
-            <th>Adjust Stock</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ingredients.map((ing) => {
-            const isLow = ing.current_stock <= ing.min_stock_level
-            return (
-              <tr class={isLow ? "table-danger" : ""}>
-                <td>{ing.name}</td>
-                <td>{ing.unit}</td>
-                <td>{ing.current_stock}</td>
-                <td>{ing.min_stock_level}</td>
-                <td>
-                  {isLow ? (
-                    <span class="badge bg-danger">Reorder</span>
-                  ) : (
-                    <span class="badge bg-success">OK</span>
-                  )}
-                </td>
-                <td>
-                  <form method="post" action={"/admin/stock/ingredient/" + ing.id + "/adjust"} class="d-flex gap-1" style="max-width:250px">
-                    <input name="adjustment" type="number" step="0.01" class="form-control form-control-sm" placeholder="+/- qty" required />
-                    <button type="submit" class="btn btn-sm btn-outline-primary">Go</button>
-                  </form>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+      <h3 class="text-lg font-semibold mb-2">Ingredients</h3>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Unit</th>
+              <th>Stock</th>
+              <th>Min</th>
+              <th>Status</th>
+              <th>Adjust Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ingredients.map((ing) => {
+              const isLow = ing.current_stock <= ing.min_stock_level
+              return (
+                <tr class={isLow ? "bg-error/10" : ""}>
+                  <td>{ing.name}</td>
+                  <td>{ing.unit}</td>
+                  <td>{ing.current_stock}</td>
+                  <td>{ing.min_stock_level}</td>
+                  <td>
+                    {isLow ? (
+                      <span class="badge badge-error">Reorder</span>
+                    ) : (
+                      <span class="badge badge-success">OK</span>
+                    )}
+                  </td>
+                  <td>
+                    <form method="post" action={"/admin/stock/ingredient/" + ing.id + "/adjust"} class="flex gap-1 max-w-56">
+                      <input name="adjustment" type="number" step="0.01" class="input input-bordered input-sm w-full" placeholder="+/- qty" required />
+                      <button type="submit" class="btn btn-sm btn-outline btn-primary">Go</button>
+                    </form>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </AdminLayout>,
   )
 }

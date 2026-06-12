@@ -8,6 +8,7 @@ import { listOrders, orderDetail, updateStatus } from "./pages/orders"
 import { menu, createCategoryHandler, toggleCategory, createItemHandler, updateItemHandler, deleteItemHandler } from "./pages/menu"
 import { stock, createIngredientHandler, adjustStockHandler } from "./pages/stock"
 import { reports } from "./pages/reports"
+import { customers } from "./pages/customers"
 
 type Bindings = { DB: D1Database; ADMIN_TOKEN?: string }
 
@@ -34,6 +35,7 @@ app.get("/stock", stock)
 app.post("/stock/ingredient", createIngredientHandler)
 app.post("/stock/ingredient/:id/adjust", adjustStockHandler)
 app.get("/reports", reports)
+app.get("/customers", customers)
 
 app.get("/", (c) => c.redirect("/dashboard"))
 

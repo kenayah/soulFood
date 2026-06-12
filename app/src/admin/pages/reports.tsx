@@ -44,180 +44,144 @@ export async function reports(c: Context) {
 
   return c.html(
     <AdminLayout title="Reports" currentPath="/admin/reports">
-      <h1 class="mb-4">Reports</h1>
+      <h1 class="text-2xl font-bold mb-4">Reports</h1>
 
-      <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
-          <a class={"nav-link" + (period === "daily" ? " active" : "")} href="/admin/reports?period=daily">Daily</a>
-        </li>
-        <li class="nav-item">
-          <a class={"nav-link" + (period === "weekly" ? " active" : "")} href="/admin/reports?period=weekly">Weekly</a>
-        </li>
-        <li class="nav-item">
-          <a class={"nav-link" + (period === "monthly" ? " active" : "")} href="/admin/reports?period=monthly">Monthly</a>
-        </li>
-      </ul>
+      <div role="tablist" class="tabs tabs-bordered mb-6">
+        <a role="tab" class={"tab" + (period === "daily" ? " tab-active" : "")} href="/admin/reports?period=daily">Daily</a>
+        <a role="tab" class={"tab" + (period === "weekly" ? " tab-active" : "")} href="/admin/reports?period=weekly">Weekly</a>
+        <a role="tab" class={"tab" + (period === "monthly" ? " tab-active" : "")} href="/admin/reports?period=monthly">Monthly</a>
+      </div>
 
       {period === "daily" && dailyReport && (
         <>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <a class="btn btn-outline-secondary btn-sm" href={"/admin/reports?period=daily&date=" + addDays(date, -1)}>← Previous Day</a>
-            <h3 class="mb-0">{date}</h3>
-            <a class={"btn btn-outline-secondary btn-sm" + (date >= today ? " disabled" : "")} href={"/admin/reports?period=daily&date=" + addDays(date, 1)}>Next Day →</a>
+          <div class="flex justify-between items-center mb-4">
+            <a class="btn btn-outline btn-secondary btn-sm" href={"/admin/reports?period=daily&date=" + addDays(date, -1)}>← Previous Day</a>
+            <h3 class="text-lg font-semibold">{date}</h3>
+            <a class={"btn btn-outline btn-secondary btn-sm" + (date >= today ? " btn-disabled" : "")} href={"/admin/reports?period=daily&date=" + addDays(date, 1)}>Next Day →</a>
           </div>
-          <div class="row mb-4">
-            <div class="col-md-4">
-              <div class="card text-bg-primary">
-                <div class="card-body">
-                  <h5>Orders</h5>
-                  <p class="display-6">{dailyReport.orderCount}</p>
-                </div>
-              </div>
+          <div class="stats shadow mb-6 w-full">
+            <div class="stat place-items-center">
+              <div class="stat-title">Orders</div>
+              <div class="stat-value text-primary">{dailyReport.orderCount}</div>
             </div>
-            <div class="col-md-4">
-              <div class="card text-bg-success">
-                <div class="card-body">
-                  <h5>Revenue</h5>
-                  <p class="display-6">R{dailyReport.revenue.toFixed(2)}</p>
-                </div>
-              </div>
+            <div class="stat place-items-center">
+              <div class="stat-title">Revenue</div>
+              <div class="stat-value text-success">R{dailyReport.revenue.toFixed(2)}</div>
             </div>
-            <div class="col-md-4">
-              <div class="card text-bg-info">
-                <div class="card-body">
-                  <h5>Avg Order</h5>
-                  <p class="display-6">R{dailyReport.avgOrderValue.toFixed(2)}</p>
-                </div>
-              </div>
+            <div class="stat place-items-center">
+              <div class="stat-title">Avg Order</div>
+              <div class="stat-value text-info">R{dailyReport.avgOrderValue.toFixed(2)}</div>
             </div>
           </div>
-          <h4>Popular Items</h4>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Sold</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dailyReport.popularItems.map((item) => (
+          <h4 class="font-semibold mb-2">Popular Items</h4>
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
                 <tr>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
+                  <th>Item</th>
+                  <th>Sold</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {dailyReport.popularItems.map((item) => (
+                  <tr>
+                    <td>{item.name}</td>
+                    <td>{item.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
 
       {period === "weekly" && weeklyReport && (
         <>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <a class="btn btn-outline-secondary btn-sm" href={"/admin/reports?period=weekly&week=" + addWeeks(week, -1)}>← Previous Week</a>
-            <h3 class="mb-0">{week}</h3>
-            <a class={"btn btn-outline-secondary btn-sm" + (week >= currentWeek ? " disabled" : "")} href={"/admin/reports?period=weekly&week=" + addWeeks(week, 1)}>Next Week →</a>
+          <div class="flex justify-between items-center mb-4">
+            <a class="btn btn-outline btn-secondary btn-sm" href={"/admin/reports?period=weekly&week=" + addWeeks(week, -1)}>← Previous Week</a>
+            <h3 class="text-lg font-semibold">{week}</h3>
+            <a class={"btn btn-outline btn-secondary btn-sm" + (week >= currentWeek ? " btn-disabled" : "")} href={"/admin/reports?period=weekly&week=" + addWeeks(week, 1)}>Next Week →</a>
           </div>
-          <div class="row mb-4">
-            <div class="col-md-4">
-              <div class="card text-bg-primary">
-                <div class="card-body">
-                  <h5>Orders</h5>
-                  <p class="display-6">{weeklyReport.orderCount}</p>
-                </div>
-              </div>
+          <div class="stats shadow mb-6 w-full">
+            <div class="stat place-items-center">
+              <div class="stat-title">Orders</div>
+              <div class="stat-value text-primary">{weeklyReport.orderCount}</div>
             </div>
-            <div class="col-md-4">
-              <div class="card text-bg-success">
-                <div class="card-body">
-                  <h5>Revenue</h5>
-                  <p class="display-6">R{weeklyReport.revenue.toFixed(2)}</p>
-                </div>
-              </div>
+            <div class="stat place-items-center">
+              <div class="stat-title">Revenue</div>
+              <div class="stat-value text-success">R{weeklyReport.revenue.toFixed(2)}</div>
             </div>
-            <div class="col-md-4">
-              <div class="card" style="border:2px solid #6c757d">
-                <div class="card-body">
-                  <h5>vs Previous Week</h5>
-                  <p class="display-6">
-                    {weeklyReport.previousWeekRevenue > 0
-                      ? ((weeklyReport.revenue - weeklyReport.previousWeekRevenue) / weeklyReport.previousWeekRevenue * 100).toFixed(1) + "%"
-                      : "—"}
-                  </p>
-                </div>
+            <div class="stat place-items-center">
+              <div class="stat-title">vs Previous Week</div>
+              <div class="stat-value text-accent">
+                {weeklyReport.previousWeekRevenue > 0
+                  ? ((weeklyReport.revenue - weeklyReport.previousWeekRevenue) / weeklyReport.previousWeekRevenue * 100).toFixed(1) + "%"
+                  : "—"}
               </div>
             </div>
           </div>
-          <h4>Top Items</h4>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Sold</th>
-              </tr>
-            </thead>
-            <tbody>
-              {weeklyReport.topItems.map((item) => (
+          <h4 class="font-semibold mb-2">Top Items</h4>
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
                 <tr>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
+                  <th>Item</th>
+                  <th>Sold</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {weeklyReport.topItems.map((item) => (
+                  <tr>
+                    <td>{item.name}</td>
+                    <td>{item.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
 
       {period === "monthly" && monthlyReport && (
         <>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <a class="btn btn-outline-secondary btn-sm" href={"/admin/reports?period=monthly&month=" + addMonths(month, -1)}>← Previous Month</a>
-            <h3 class="mb-0">{month}</h3>
-            <a class={"btn btn-outline-secondary btn-sm" + (month >= currentMonth ? " disabled" : "")} href={"/admin/reports?period=monthly&month=" + addMonths(month, 1)}>Next Month →</a>
+          <div class="flex justify-between items-center mb-4">
+            <a class="btn btn-outline btn-secondary btn-sm" href={"/admin/reports?period=monthly&month=" + addMonths(month, -1)}>← Previous Month</a>
+            <h3 class="text-lg font-semibold">{month}</h3>
+            <a class={"btn btn-outline btn-secondary btn-sm" + (month >= currentMonth ? " btn-disabled" : "")} href={"/admin/reports?period=monthly&month=" + addMonths(month, 1)}>Next Month →</a>
           </div>
-          <div class="row mb-4">
-            <div class="col-md-4">
-              <div class="card text-bg-primary">
-                <div class="card-body">
-                  <h5>Orders</h5>
-                  <p class="display-6">{monthlyReport.orderCount}</p>
-                </div>
-              </div>
+          <div class="stats shadow mb-6 w-full">
+            <div class="stat place-items-center">
+              <div class="stat-title">Orders</div>
+              <div class="stat-value text-primary">{monthlyReport.orderCount}</div>
             </div>
-            <div class="col-md-4">
-              <div class="card text-bg-success">
-                <div class="card-body">
-                  <h5>Revenue</h5>
-                  <p class="display-6">R{monthlyReport.revenue.toFixed(2)}</p>
-                </div>
-              </div>
+            <div class="stat place-items-center">
+              <div class="stat-title">Revenue</div>
+              <div class="stat-value text-success">R{monthlyReport.revenue.toFixed(2)}</div>
             </div>
-            <div class="col-md-4">
-              <div class="card text-bg-info">
-                <div class="card-body">
-                  <h5>Avg Order</h5>
-                  <p class="display-6">R{monthlyReport.avgOrderValue.toFixed(2)}</p>
-                </div>
-              </div>
+            <div class="stat place-items-center">
+              <div class="stat-title">Avg Order</div>
+              <div class="stat-value text-info">R{monthlyReport.avgOrderValue.toFixed(2)}</div>
             </div>
           </div>
-          <h4>By Payment Method</h4>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Method</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthlyReport.byPaymentMethod.map((pm) => (
+          <h4 class="font-semibold mb-2">By Payment Method</h4>
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
                 <tr>
-                  <td>{pm.method}</td>
-                  <td>R{pm.total.toFixed(2)}</td>
+                  <th>Method</th>
+                  <th>Total</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {monthlyReport.byPaymentMethod.map((pm) => (
+                  <tr>
+                    <td>{pm.method}</td>
+                    <td>R{pm.total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </AdminLayout>,

@@ -21,6 +21,8 @@ The `ADMIN_TOKEN` is set as an environment variable in the Cloudflare Worker.
 
 ### Create Order
 
+Automatically upserts a customer record by phone number. Existing customers get their name/address/notes updated and their `total_orders` incremented.
+
 ```http
 POST /api/orders
 Content-Type: application/json
@@ -32,19 +34,27 @@ Content-Type: application/json
   "notes": "Extra chakalaka please",
   "paymentMethod": "cash",
   "items": [
-    { "menuItemId": 1, "quantity": 2 }
+    {
+      "menuItemId": 1,
+      "quantity": 2,
+      "itemName": "Mogodu Wednesday (Creamy Samp)"
+    }
   ]
 }
 ```
+
+The optional `itemName` field carries the item name with the customer's starch choice appended (e.g. "Mogodu Wednesday (Creamy Samp)"). When present, the API uses this as the display name; otherwise it resolves the name from the DB.
 
 **Response:** `201 Created`
 
 ```json
 {
   "id": 42,
+  "customer_id": 7,
+  "customer_name": "Thandi",
+  "phone": "0712345678",
   "status": "placed",
-  "total": 180.00,
-  "createdAt": "2026-06-02T12:00:00Z"
+  "total": 180.00
 }
 ```
 
@@ -109,7 +119,76 @@ Authorization: Bearer <token>
 
 **Response:** `200 OK`
 
+## Public Endpoints
+
+### Get Menu (Public — no auth)
+
+Returns all available categories with their items. Items with a price of `0` (e.g. "Market Price") are excluded. Used by the Hugo storefront to render the menu dynamically.
+
+```http
+GET /api/public/menu
+```
+
+**Response:** `200 OK`
+
+```json
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Main Course",
+      "sortOrder": 1,
+      "items": [
+        {
+          "id": 1,
+          "name": "Mogodu Wednesday",
+          "description": "Deliciously slow cooked tripe...",
+          "price": 90,
+          "starch": "Creamy Samp or Steamed Bread",
+          "prepTimeMinutes": 30
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Create Order (Public — no auth)
+
+Same as the admin `POST /api/orders`. Customer records are upserted by phone number automatically. The frontend may send an `itemName` with the starch choice appended (e.g. "Mogodu Wednesday (Creamy Samp)") rather than the bare menu item name.
+
+```http
+POST /api/orders
+Content-Type: application/json
+
+{
+  "customerName": "Thandi",
+  "phone": "0712345678",
+  "deliveryAddress": "123 Main St, Soweto",
+  "notes": "Extra chakalaka please",
+  "paymentMethod": "cash",
+  "items": [
+    { "menuItemId": 1, "quantity": 2, "itemName": "Mogodu Wednesday (Creamy Samp)" }
+  ]
+}
+```
+
+**Response:** `201 Created`
+
+```json
+{
+  "id": 42,
+  "customer_id": 7,
+  "customer_name": "Thandi",
+  "phone": "0712345678",
+  "status": "placed",
+  "total": 180.00
+}
+```
+
 ## Menu Endpoints
+
+All menu admin endpoints require authentication.
 
 ### List Categories
 
@@ -136,6 +215,8 @@ Content-Type: application/json
   "price": 90.00,
   "categoryId": 1,
   "prepTimeMinutes": 30,
+  "image": "https://images.example.com/mogodu.jpg",
+  "starch": "Creamy Samp or Steamed Bread",
   "available": true
 }
 ```

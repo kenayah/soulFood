@@ -1319,3 +1319,123 @@ nav .block .navbar-default .navbar-nav > .active > a:hover:before {
 .cart-clear-btn:hover {
   color: #e74c3c;
 }
+
+/* Checkout Form */
+
+.checkout-form {
+  padding: 8px 0;
+}
+
+.checkout-title {
+  font-size: 18px;
+  color: #2e2e2e;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.checkout-title span {
+  color: #ff5333;
+}
+
+.checkout-input {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: myfont;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.checkout-input:focus {
+  outline: none;
+  border-color: #ff4f02;
+}
+
+.checkout-textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.checkout-error {
+  background: #fff0f0;
+  color: #c0392b;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-bottom: 10px;
+  border: 1px solid #f5c6cb;
+}
+
+/* Starch Picker */
+
+.starch-picker {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10001;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.starch-picker.open {
+  display: flex;
+}
+
+.starch-picker-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.starch-picker-content h4 {
+  font-size: 18px;
+  color: #2e2e2e;
+  margin: 0 0 20px;
+  text-transform: uppercase;
+}
+
+.starch-picker-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.starch-picker-option {
+  padding: 14px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.starch-picker-option:hover {
+  border-color: #ff4f02;
+  color: #ff4f02;
+}
+
+.starch-picker-option.selected {
+  border-color: #ff4f02;
+  background: #fff5f0;
+  color: #ff4f02;
+  font-weight: 700;
+}
+
+.starch-picker-actions {
+  display: flex;
+  justify-content: center;
+}

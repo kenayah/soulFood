@@ -70,6 +70,8 @@ app.post("/items", async (c) => {
     price: parsed.data.price,
     categoryId: parsed.data.categoryId,
     prepTimeMinutes: parsed.data.prepTimeMinutes,
+    starch: parsed.data.starch,
+    image: parsed.data.image,
     available: parsed.data.available,
   })
   return c.json(item, 201)

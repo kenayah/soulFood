@@ -4,6 +4,7 @@ import { getDb } from "../../lib/d1"
 import { orderSchema, statusUpdateSchema } from "../../lib/validators"
 import {
   createOrder,
+  upsertCustomer,
   getOrders,
   getOrderById,
   getOrderItems,
@@ -22,9 +23,29 @@ app.post("/", async (c) => {
   const db = getDb(c.env)
   const { items, ...orderData } = parsed.data
 
+  // Upsert customer by phone
+  const customerId = await upsertCustomer(db, {
+    name: orderData.customerName,
+    phone: orderData.phone,
+    deliveryAddress: orderData.deliveryAddress,
+    notes: orderData.notes,
+  })
+
   // Resolve item names and prices from DB
   const itemDetails = await Promise.all(
     items.map(async (item) => {
+      // Use frontend-provided itemName (includes starch) if available
+      if (item.itemName) {
+        const price = await c.env.DB.prepare(
+          "SELECT price FROM menu_items WHERE id = ?",
+        ).bind(item.menuItemId).first<{ price: number }>()
+        return {
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          itemName: item.itemName,
+          unitPrice: price?.price ?? 0,
+        }
+      }
       const menuItem = await c.env.DB.prepare(
         "SELECT id, name, price FROM menu_items WHERE id = ?",
       ).bind(item.menuItemId).first<{ id: number; name: string; price: number }>()
@@ -37,7 +58,7 @@ app.post("/", async (c) => {
     }),
   )
 
-  const order = await createOrder(db, { ...orderData, items: itemDetails })
+  const order = await createOrder(db, { ...orderData, items: itemDetails, customerId })
   return c.json(order, 201)
 })
 

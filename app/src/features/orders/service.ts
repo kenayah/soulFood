@@ -24,6 +24,53 @@ export interface OrderRow {
   updated_at: string
 }
 
+export interface CustomerRow {
+  id: number
+  name: string
+  phone: string
+  delivery_address: string | null
+  notes: string | null
+  total_orders: number
+  last_order_at: string
+  created_at: string
+  updated_at: string
+}
+
+export async function upsertCustomer(
+  db: D1Database,
+  data: { name: string; phone: string; deliveryAddress?: string; notes?: string }
+): Promise<number> {
+  const existing = await queryOne<{ id: number }>(
+    db,
+    "SELECT id FROM customers WHERE phone = ?",
+    data.phone,
+  )
+
+  if (existing) {
+    await execute(
+      db,
+      `UPDATE customers SET name = ?, delivery_address = COALESCE(?, delivery_address),
+       notes = COALESCE(?, notes), total_orders = total_orders + 1,
+       last_order_at = datetime('now'), updated_at = datetime('now') WHERE id = ?`,
+      data.name,
+      data.deliveryAddress ?? null,
+      data.notes ?? null,
+      existing.id,
+    )
+    return existing.id
+  }
+
+  const customer = await queryOne<{ id: number }>(
+    db,
+    `INSERT INTO customers (name, phone, delivery_address, notes) VALUES (?, ?, ?, ?) RETURNING id`,
+    data.name,
+    data.phone,
+    data.deliveryAddress ?? null,
+    data.notes ?? null,
+  )
+  return customer!.id
+}
+
 export async function createOrder(
   db: D1Database,
   data: {
@@ -32,6 +79,7 @@ export async function createOrder(
     deliveryAddress?: string
     notes?: string
     paymentMethod: string
+    customerId?: number
     items: { menuItemId: number; quantity: number; itemName: string; unitPrice: number }[]
   }
 ): Promise<OrderRow> {
@@ -39,14 +87,15 @@ export async function createOrder(
 
   const order = await queryOne<OrderRow>(
     db,
-    `INSERT INTO orders (customer_name, phone, delivery_address, notes, total, payment_method)
-     VALUES (?, ?, ?, ?, ?, ?) RETURNING *`,
+    `INSERT INTO orders (customer_name, phone, delivery_address, notes, total, payment_method, customer_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *`,
     data.customerName,
     data.phone,
     data.deliveryAddress ?? null,
     data.notes ?? null,
     total,
     data.paymentMethod,
+    data.customerId ?? null,
   )
 
   if (!order) throw new Error("Failed to create order")
@@ -186,6 +235,17 @@ export async function getOrderStatusLog(
     db,
     "SELECT * FROM order_status_log WHERE order_id = ? ORDER BY created_at",
     orderId,
+  )
+}
+
+export async function getCustomers(
+  db: D1Database,
+  limit: number = 50,
+): Promise<CustomerRow[]> {
+  return queryAll<CustomerRow>(
+    db,
+    "SELECT * FROM customers ORDER BY last_order_at DESC NULLS LAST LIMIT ?",
+    limit,
   )
 }
 

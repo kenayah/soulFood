@@ -56,89 +56,106 @@ pricing:
   description: "Our focus is on providing a good deal and <b>Overall Great Vibes</b> altpgether, ensuring the price is reasonable."
   subtitle : "FEATURED ON THE WEEK"
   pricing_item:
-  - title: "Mogodu Wednesday"
+  - id: 1
+    title: "Mogodu Wednesday"
     category: "Main Course"
     description: "Deliciously slow cooked tripe served with Butternut & Creamy Spinach."
     starch: "Creamy Samp or Steamed Bread"
     price : "R 90.00"
 
-  - title: "Umleqwa Friday"
+  - id: 2
+    title: "Umleqwa Friday"
     category: "Main Course"
     description: "Tender Hardbody Chicken, served with Chakalaka & Spicy Spinach."
     starch: "Samp & Beans or Steamed Bread"
     price : "R 100.00"
     
-  - title: "Sunday Kos Meal"
+  - id: 3
+    title: "Sunday Kos Meal"
     category: "Main Course"
     description: "Fried Savoury Rice, Beef Stew, Creamy Spinach, Roasted Butternut with Feta & Chakalaka."
     price : "R 120.00"
     
-  - title: "Sunday Kos 7 Colors Meal"
+  - id: 4
+    title: "Sunday Kos 7 Colors Meal"
     category: "Main Course"
     description: "Fried Savoury Rice, Beef Stew, Potato Salad, Chakalaka, Roasted Butternut with Feta, Creamy Spinach & Beetroot."
     price : "R 150.00"
     
-  - title: "Ama Zulu Beef Stew"
+  - id: 5
+    title: "Ama Zulu Beef Stew"
     category: "Main Course"
     description: "Slowly Cooked Beef from Ma Gogo's Pot"
     price : "R 145.00"
 
-  - title: "Cow's Head"
+  - id: 6
+    title: "Cow's Head"
     category: "Main Course"
     description: "Big Fat Cow’s Head Cooked Ama Zulu Style"
     price : "Market Price"
 
-  - title: "Anatie's Umphokoqo"
+  - id: 7
+    title: "Anatie's Umphokoqo"
     category: "Side Dish"
     description: "Anatie's take on granulated, steamed maize with amasi (sour milk) — just like Grandma used to make."
     price : "R 65.00"
     
-  - title: "Steamed Bread"
+  - id: 8
+    title: "Steamed Bread"
     category: "Side Dish"
     description: "The Taste of a Long Lasting Tradition Carefully Passed Through Generation"
     price : "R 32.00"
    
-  - title: "Creamy Samp"
+  - id: 9
+    title: "Creamy Samp"
     category: "Side Dish"
     description: "Creamy, buttery maize meal — the ultimate soul food side."
     price : "R 26.00"
 
-  - title: "Samp & Beans"
+  - id: 10
+    title: "Samp & Beans"
     category: "Side Dish"
     description: "Traditional samp and sugar beans, slow-cooked to perfection."
     price : "R 26.00"
 
-  - title: "Fried Savoury Rice"
+  - id: 11
+    title: "Fried Savoury Rice"
     category: "Side Dish"
     description: "Flavourful fried rice with aromatic spices."
     price : "R 26.00"
 
-  - title: "Plain Rice"
+  - id: 12
+    title: "Plain Rice"
     category: "Side Dish"
     description: "Simple steamed white rice."
     price : "R 26.00"
 
-  - title: "Umqombothi"
+  - id: 13
+    title: "Umqombothi"
     category: "Drinks"
     description: "Traditional African beer from maize, sorghum, yeast, water"
     price : "R 26.00"
 
-  - title: "Rooibos Tea"
+  - id: 14
+    title: "Rooibos Tea"
     category: "Hot Beverages"
     description: "Caffeine-free red bush tea from Cederberg Mountains, drunk black with honey or lemon"
     price : "R 16.00"
 
-  - title: "Kloof Coffee"
+  - id: 15
+    title: "Kloof Coffee"
     category: "Hot Beverages"
     description: "Freshly brewed locally roasted coffee, served black or with milk"
     price : "R 21.00"
 
-  - title: "Rock Shandy"
+  - id: 16
+    title: "Rock Shandy"
     category: "Drinks"
     description: "Lemonade, soda water, Angostura bitters and lemon slice, with ice"
     price : "R 26.00"
 
-  - title: "Spring Water"
+  - id: 17
+    title: "Spring Water"
     category: "Drinks"
     description: "Pure natural spring water, still or sparkling"
     price : "R 16.00"

@@ -37,24 +37,40 @@ npm run dev
 
 Opens at `http://localhost:8787`. The API serves both REST endpoints and the admin dashboard.
 
-### 4. Create the D1 database
+### 4. Create and seed the D1 database
 
 ```bash
 cd app
-wrangler d1 create soulfood-dev
-wrangler d1 execute soulfood-dev --file=migrations/001_create_tables.sql
+
+# Default database (used by `npm run dev`)
+wrangler d1 create soulfood
+wrangler d1 execute soulfood --local --file=migrations/001_create_tables.sql
+wrangler d1 execute soulfood --local --file=migrations/002_add_starch.sql
+wrangler d1 execute soulfood --local --file=migrations/003_add_customers.sql
+npm run seed:local:default
+
+# Dev environment database (used by `npm run dev -e dev`)
+wrangler d1 create soulfood-dev -e dev
+wrangler d1 execute soulfood-dev -e dev --local --file=migrations/001_create_tables.sql
+wrangler d1 execute soulfood-dev -e dev --local --file=migrations/002_add_starch.sql
+wrangler d1 execute soulfood-dev -e dev --local --file=migrations/003_add_customers.sql
+npm run seed:local
 ```
 
-Copy the database ID into `wrangler.toml`.
+Copy the database IDs into `wrangler.toml`.
+
+> Migrations are also applied automatically at Worker startup by `init-db.ts` (idempotent — uses `IF NOT EXISTS` / try-catch). Manual execution is only needed for initial setup or production deploys.
 
 ### 5. Run everything together
 
-```bash
-# Terminal 1 — Hugo site
-cd site && hugo server
+The menu is fetched dynamically from the API — both servers must be running.
 
-# Terminal 2 — Hono API + admin
+```bash
+# Terminal 1 — Hono API (must run first, menu depends on it)
 cd app && npm run dev
+
+# Terminal 2 — Hugo site
+cd site && hugo server
 ```
 
 ## Project Scripts
@@ -63,6 +79,8 @@ cd app && npm run dev
 |---|---|---|
 | `npm run dev` | `app/` | Start Hono dev server |
 | `npm run deploy` | `app/` | Deploy Hono to Cloudflare Workers |
+| `npm run seed:local` | `app/` | Seed dev DB (`soulfood-dev`) with categories + menu items |
+| `npm run seed:local:default` | `app/` | Seed default DB (`soulfood`) |
 | `hugo server` | `site/` | Start Hugo dev server |
 | `hugo` | `site/` | Build Hugo site to `public/` |
 | `wrangler d1 execute` | `app/` | Run migrations against D1 |

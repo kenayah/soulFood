@@ -82,8 +82,9 @@ sequenceDiagram
     participant N as Notifications
 
     C->>W: POST /api/orders (cart, customer info)
-    W->>D1: INSERT order (status: placed)
-    W->>D1: INSERT order_items
+    W->>D1: UPSERT customer by phone
+    W->>D1: INSERT order (status: placed, customer_id)
+    W->>D1: INSERT order_items (with itemName including starch)
     W->>N: notify("new_order", orderId)
     N-->>Admin: new order alert
     W-->>C: { orderId, status: "placed" }

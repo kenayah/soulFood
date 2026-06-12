@@ -9,40 +9,7 @@
 						{{ .title | markdownify }}</h1>
 					<p class="wow fadeInUp" data-wow-duration="300ms" data-wow-delay="400ms">
 						{{ .description | markdownify }}</p>
-					<div class="pricing-list">
-						{{ $all := .pricing_item }}
-						{{ range (slice "Main Course" "Side Dish" "Dessert" "Hot Beverages" "Drinks") }}
-						{{ $cat := . }}
-						{{ $items := where $all "category" $cat }}
-						{{ if $items }}
-						<div class="title">
-							<h3><span>{{ $cat }}</span></h3>
-						</div>
-						<ul>
-							{{ range $items }}
-							{{ $slug := .title | urlize }}
-							<li class="wow fadeInUp" data-wow-duration="300ms" data-wow-delay="300ms">
-								<div class="item">
-									<div class="item-title">
-										<h2>{{.title}}</h2>
-										<div class="border-bottom"></div>
-										{{ with .price }}<span>{{.}}</span>{{ end }}
-									</div>
-									<p>{{.description}}</p>
-									{{if .starch}}
-									<p><b>Choice of Starch</b> : {{.starch}}</p>
-									{{ end }}
-									{{ if and .price (findRE "^R\\s*[0-9]" .price) }}
-									{{ $price := replaceRE "[^0-9.]" "" .price }}
-									<button class="add-to-cart" data-id="{{ $slug }}" data-title="{{ .title }}" data-price="{{ $price }}" data-starch="{{ .starch }}">Add to Cart</button>
-									{{ end }}
-								</div>
-							</li>
-							{{ end }}
-						</ul>
-						{{ end }}
-						{{ end }}
-					</div>
+					<div id="dynamic-menu" class="pricing-list"></div>
 				</div>
 			</div>
 		</div>

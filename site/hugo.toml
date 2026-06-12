@@ -5,6 +5,7 @@ theme = "restaurant-hugo"
 
 [params]
 logo = "images/logo.webp"
+apiBaseURL = "http://localhost:8787"
 
 [[menu.main]]
 name = "Plates"

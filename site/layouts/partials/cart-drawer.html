@@ -1,5 +1,15 @@
 <div id="cart-overlay" class="cart-overlay"></div>
 
+<div id="starch-picker" class="starch-picker" style="display:none">
+  <div class="starch-picker-content">
+    <h4 id="starch-picker-title">Choose your starch</h4>
+    <div id="starch-picker-options" class="starch-picker-options"></div>
+    <div class="starch-picker-actions">
+      <button id="starch-picker-cancel" class="cart-clear-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div id="cart-drawer" class="cart-drawer">
   <div class="cart-header">
     <h3>Your <span>Order</span></h3>
@@ -13,6 +23,15 @@
       <span>Browse our menu to add items</span>
     </div>
     <div id="cart-items" class="cart-items"></div>
+
+    <div id="checkout-form" class="checkout-form" style="display:none">
+      <h4 class="checkout-title">Your <span>Details</span></h4>
+      <input type="text" id="checkout-name" class="checkout-input" placeholder="Your name *" required>
+      <input type="tel" id="checkout-phone" class="checkout-input" placeholder="Phone number *" required>
+      <input type="text" id="checkout-address" class="checkout-input" placeholder="Delivery address (optional)">
+      <textarea id="checkout-notes" class="checkout-input checkout-textarea" placeholder="Order notes (optional)"></textarea>
+      <div id="checkout-error" class="checkout-error" style="display:none"></div>
+    </div>
   </div>
 
   <div id="cart-footer" class="cart-footer">
@@ -22,6 +41,8 @@
     </div>
     <div class="cart-actions">
       <button id="cart-checkout" class="btn btn-default btn-block">Place Order</button>
+      <button id="cart-submit-order" class="btn btn-default btn-block" style="display:none">Submit Order</button>
+      <button id="cart-back" class="cart-clear-btn" style="display:none">&larr; Back to cart</button>
       <button id="cart-clear" class="cart-clear-btn">Clear order</button>
     </div>
   </div>

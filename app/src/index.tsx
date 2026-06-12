@@ -9,6 +9,7 @@ import stockRoutes from "./features/stock/routes"
 import reportingRoutes from "./features/reporting/routes"
 import paymentsRoutes from "./features/payments/routes"
 import notificationsRoutes from "./features/notifications/routes"
+import publicRoutes from "./features/public/routes"
 import adminRoutes from "./admin/routes"
 import { requireAuth } from "./auth/middleware"
 import { initDb } from "./lib/init-db"
@@ -46,6 +47,7 @@ app.get("/api/health", (c) => c.json({ status: "ok", service: "soulfood-api" }))
 
 // Public routes
 app.route("/api/orders", ordersRoutes)
+app.route("/api/public", publicRoutes)
 
 // Authenticated API routes
 app.use("/api/menu/*", requireAuth)

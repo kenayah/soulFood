@@ -1,6 +1,38 @@
 ;(function ($) {
   'use strict'
 
+  var API = typeof SOULFOOD_API !== 'undefined' ? SOULFOOD_API : 'http://localhost:8787'
+
+  var pendingItem = null
+
+  function parseStarchOptions(str) {
+    if (!str) return []
+    return str.split(/\s+or\s+/).filter(Boolean)
+  }
+
+  function showStarchPicker(options, callback) {
+    var $picker = $('#starch-picker')
+    var $options = $('#starch-picker-options')
+    $options.empty()
+
+    options.forEach(function (opt) {
+      $options.append('<button class="starch-picker-option" data-value="' + opt + '">' + opt + '</button>')
+    })
+
+    $picker.addClass('open')
+
+    $options.off('click.starch').on('click.starch', '.starch-picker-option', function () {
+      var selected = $(this).data('value')
+      $picker.removeClass('open')
+      callback(selected)
+    })
+
+    $('#starch-picker-cancel').off('click.starch').on('click.starch', function () {
+      $picker.removeClass('open')
+      pendingItem = null
+    })
+  }
+
   var Cart = {
     key: 'soulfood_cart',
 
@@ -18,9 +50,14 @@
       this.render()
     },
 
+    _key: function (item) {
+      return item.id + '::' + (item.starch || '')
+    },
+
     add: function (item) {
       var items = this.get()
-      var existing = items.filter(function (i) { return i.id === item.id })[0]
+      var key = this._key(item)
+      var existing = items.filter(function (i) { return this._key(i) === key }.bind(this))[0]
       if (existing) {
         existing.qty += item.qty || 1
       } else {
@@ -29,14 +66,14 @@
       this.save(items)
     },
 
-    remove: function (id) {
-      this.save(this.get().filter(function (i) { return i.id !== id }))
+    remove: function (key) {
+      this.save(this.get().filter(function (i) { return this._key(i) !== key }.bind(this)))
     },
 
-    updateQty: function (id, qty) {
-      if (qty < 1) { this.remove(id); return }
+    updateQty: function (key, qty) {
+      if (qty < 1) { this.remove(key); return }
       var items = this.get()
-      items.forEach(function (i) { if (i.id === id) i.qty = qty })
+      items.forEach(function (i) { if (this._key(i) === key) i.qty = qty }.bind(this))
       this.save(items)
     },
 
@@ -58,12 +95,19 @@
     },
 
     render: function () {
+      var self = this
       var items = this.get()
       var $body = $('#cart-items')
       var $empty = $('#cart-empty')
       var $footer = $('#cart-footer')
+      var $form = $('#checkout-form')
 
       $body.empty()
+      $form.hide()
+      $('#cart-checkout').show()
+      $('#cart-submit-order').hide()
+      $('#cart-back').hide()
+      $('#cart-clear').show()
 
       if (!items.length) {
         $empty.show()
@@ -76,7 +120,7 @@
 
       items.forEach(function (item) {
         $body.append(
-          '<div class="cart-item" data-id="' + item.id + '">' +
+          '<div class="cart-item" data-key="' + self._key(item) + '">' +
             '<div class="cart-item-info">' +
               '<div class="cart-item-title">' + item.title + '</div>' +
               (item.starch ? '<div class="cart-item-starch">' + item.starch + '</div>' : '') +
@@ -95,6 +139,104 @@
       $('#cart-total-amount').text('R ' + this.getTotal().toFixed(2))
     },
 
+    _fillCheckout: function () {
+      var saved
+      try { saved = JSON.parse(localStorage.getItem('soulfood_checkout')) } catch (e) {}
+      if (saved) {
+        if (!document.getElementById('checkout-name').value) $('#checkout-name').val(saved.name || '')
+        if (!document.getElementById('checkout-phone').value) $('#checkout-phone').val(saved.phone || '')
+        if (!document.getElementById('checkout-address').value) $('#checkout-address').val(saved.address || '')
+        if (!document.getElementById('checkout-notes').value) $('#checkout-notes').val(saved.notes || '')
+      }
+    },
+
+    showCheckout: function () {
+      this._fillCheckout()
+      $('#cart-items').hide()
+      $('#cart-empty').hide()
+      $('#checkout-form').show()
+      $('#cart-checkout').hide()
+      $('#cart-submit-order').show()
+      $('#cart-back').show()
+      $('#checkout-error').hide()
+    },
+
+    hideCheckout: function () {
+      $('#cart-items').show()
+      $('#checkout-form').hide()
+      $('#cart-checkout').show()
+      $('#cart-submit-order').hide()
+      $('#cart-back').hide()
+      $('#checkout-error').hide()
+    },
+
+    showError: function (msg) {
+      $('#checkout-error').text(msg).show()
+    },
+
+    submitOrder: function () {
+      var self = this
+      var name = $('#checkout-name').val().trim()
+      var phone = $('#checkout-phone').val().trim()
+      var address = $('#checkout-address').val().trim()
+      var notes = $('#checkout-notes').val().trim()
+
+      if (!name) { self.showError('Please enter your name'); return }
+      if (!phone) { self.showError('Please enter your phone number'); return }
+
+      var items = this.get()
+      var total = this.getTotal()
+
+      var payload = {
+        customerName: name,
+        phone: phone,
+        deliveryAddress: address || undefined,
+        notes: notes || undefined,
+        paymentMethod: 'cash',
+        items: items.map(function (i) {
+          var menuItemId = parseInt(i.id, 10)
+          var itemName = i.title + (i.starch ? ' (' + i.starch + ')' : '')
+          return isNaN(menuItemId) ? { menuItemId: 0, quantity: i.qty, itemName: itemName, unitPrice: i.price } : { menuItemId: menuItemId, quantity: i.qty, itemName: itemName }
+        })
+      }
+
+      $('#cart-submit-order').prop('disabled', true).text('Submitting...')
+
+      $.ajax({
+        url: API + '/api/orders',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function (order) {
+          // Save customer details for next order
+          try {
+            localStorage.setItem('soulfood_checkout', JSON.stringify({ name: name, phone: phone, address: address, notes: notes }))
+          } catch (e) {}
+
+          var msg = 'Order #' + order.id + ' confirmed!\n' +
+            items.map(function (i) { return i.qty + 'x ' + i.title + (i.starch ? ' (' + i.starch + ')' : '') }).join('\n') +
+            '\n\nTotal: R ' + total.toFixed(2) +
+            '\n\nName: ' + name +
+            '\nPhone: ' + phone +
+            (address ? '\nAddress: ' + address : '') +
+            (notes ? '\nNotes: ' + notes : '') +
+            '\n\nWe will call to confirm.'
+          self.clear()
+          self.close()
+          window.open('https://wa.me/0694660013?text=' + encodeURIComponent(msg), '_blank')
+        },
+        error: function (xhr) {
+          $('#cart-submit-order').prop('disabled', false).text('Submit Order')
+          var msg = 'Could not place order'
+          try {
+            var err = JSON.parse(xhr.responseText)
+            if (err.error) msg += ': ' + (err.error.message || JSON.stringify(err.error))
+          } catch (e) {}
+          self.showError(msg)
+        }
+      })
+    },
+
     open: function () {
       this.render()
       $('#cart-overlay').fadeIn(200)
@@ -103,6 +245,7 @@
     },
 
     close: function () {
+      this.hideCheckout()
       $('#cart-overlay').fadeOut(200)
       $('#cart-drawer').removeClass('open')
       $('body').css('overflow', '')
@@ -124,11 +267,32 @@
 
       $(document).on('click', '.add-to-cart', function () {
         var $btn = $(this)
+        var starch = ($btn.data('starch') || '').trim()
+        var options = parseStarchOptions(starch)
+
+        if (options.length > 1) {
+          pendingItem = {
+            id: $btn.data('id'),
+            title: $btn.data('title'),
+            price: parseFloat($btn.data('price')) || 0
+          }
+          showStarchPicker(options, function (choice) {
+            pendingItem.starch = choice
+            self.add(pendingItem)
+            pendingItem = null
+            $btn.text('Added!').addClass('added')
+            setTimeout(function () {
+              $btn.text('Add to Cart').removeClass('added')
+            }, 1200)
+          })
+          return
+        }
+
         var item = {
           id: $btn.data('id'),
           title: $btn.data('title'),
           price: parseFloat($btn.data('price')) || 0,
-          starch: $btn.data('starch') || ''
+          starch: starch
         }
         self.add(item)
 
@@ -140,7 +304,7 @@
 
       $(document).on('click', '.cart-qty-btn', function () {
         var $item = $(this).closest('.cart-item')
-        var id = $item.data('id')
+        var key = $item.data('key')
         var $input = $item.find('.cart-qty-input')
         var qty = parseInt($input.val(), 10)
         var action = $(this).data('action')
@@ -148,12 +312,12 @@
         if (action === 'inc') qty++
         else if (action === 'dec') qty--
 
-        self.updateQty(id, qty)
+        self.updateQty(key, qty)
       })
 
       $(document).on('click', '.cart-item-remove', function () {
-        var id = $(this).closest('.cart-item').data('id')
-        self.remove(id)
+        var key = $(this).closest('.cart-item').data('key')
+        self.remove(key)
       })
 
       $(document).on('click', '#cart-clear', function () {
@@ -162,12 +326,15 @@
 
       $(document).on('click', '#cart-checkout', function () {
         if (!self.getCount()) return
-        self.close()
-        var total = self.getTotal().toFixed(2)
-        var items = self.get().map(function (i) { return i.qty + 'x ' + i.title }).join('\n')
-        var msg = 'New Order:\n' + items + '\n\nTotal: R ' + total + '\n\nPlease call to confirm.'
-        var phone = '0694660013'
-        window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank')
+        self.showCheckout()
+      })
+
+      $(document).on('click', '#cart-back', function () {
+        self.hideCheckout()
+      })
+
+      $(document).on('click', '#cart-submit-order', function () {
+        self.submitOrder()
       })
     }
   }

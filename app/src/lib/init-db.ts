@@ -24,6 +24,43 @@ const STATEMENTS: string[] = [
 ]
 
 let migrationRan = false
+let starchColMigrated = false
+let customersMigrated = false
+
+async function ensureStarchColumn(db: D1Database): Promise<void> {
+  if (starchColMigrated) return
+  starchColMigrated = true
+  try {
+    await db.prepare("ALTER TABLE menu_items ADD COLUMN starch TEXT").run()
+    console.log("Added starch column to menu_items")
+  } catch {
+    // Column already exists — ignore
+  }
+}
+
+async function ensureCustomersTable(db: D1Database): Promise<void> {
+  if (customersMigrated) return
+  customersMigrated = true
+  try {
+    await db.prepare(`CREATE TABLE IF NOT EXISTS customers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      delivery_address TEXT,
+      notes TEXT,
+      total_orders INTEGER NOT NULL DEFAULT 1,
+      last_order_at TEXT NOT NULL DEFAULT (datetime('now')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`).run()
+    await db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone)").run()
+    await db.prepare("ALTER TABLE orders ADD COLUMN customer_id INTEGER REFERENCES customers(id)").run()
+    await db.prepare("CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id)").run()
+    console.log("Added customers table and order reference")
+  } catch {
+    // Table/column already exists — ignore
+  }
+}
 
 export async function initDb(db: D1Database): Promise<boolean> {
   if (migrationRan) return true
@@ -32,6 +69,8 @@ export async function initDb(db: D1Database): Promise<boolean> {
     for (const stmt of STATEMENTS) {
       await db.prepare(stmt).run()
     }
+    await ensureStarchColumn(db)
+    await ensureCustomersTable(db)
     console.log("Database migration applied successfully")
     return true
   } catch (err) {

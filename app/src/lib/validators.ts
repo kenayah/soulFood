@@ -9,16 +9,19 @@ export const PaymentStatus = z.enum([
   "pending", "verified", "captured", "refunded", "failed",
 ])
 
+export const orderItemSchema = z.object({
+  menuItemId: z.number(),
+  quantity: z.number().min(1),
+  itemName: z.string().optional(),
+})
+
 export const orderSchema = z.object({
   customerName: z.string().min(1),
   phone: z.string().min(5),
   deliveryAddress: z.string().optional(),
   notes: z.string().optional(),
   paymentMethod: z.enum(["cash", "card", "eft"]).default("cash"),
-  items: z.array(z.object({
-    menuItemId: z.number(),
-    quantity: z.number().min(1),
-  })).min(1),
+  items: z.array(orderItemSchema).min(1),
 })
 
 export const statusUpdateSchema = z.object({
@@ -31,6 +34,8 @@ export const menuItemSchema = z.object({
   price: z.number().positive(),
   categoryId: z.number().optional(),
   prepTimeMinutes: z.number().optional(),
+  starch: z.string().optional(),
+  image: z.string().optional(),
   available: z.boolean().default(true),
 })
 
