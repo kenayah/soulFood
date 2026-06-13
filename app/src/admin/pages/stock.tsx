@@ -140,7 +140,7 @@ export async function stock(c: Context) {
                 : null
               return <>
                 <tr class={isLow ? "bg-error/10" : ""}>
-                  <td>{ing.name}<br/><span class="text-xs text-base-content/60">{ing.category_name ?? "—"}</span></td>
+                  <td>{ing.name}<br/><span class="text-xs text-base-content/60 max-md:hidden">{ing.category_name ?? "—"}</span></td>
                   <td>{ing.unit}</td>
                   <td class="font-mono">{ing.current_stock}</td>
                   <td class="font-mono">{ing.min_stock_level}</td>
@@ -167,6 +167,7 @@ export async function stock(c: Context) {
                   </td>
                   <td></td>
                 </tr>
+                <tr class="md:hidden"><td colspan={10} class="text-xs text-base-content/60 pb-1 pt-0">Category: {ing.category_name ?? "—"}</td></tr>
                 <tr><td colspan={10} style="padding:0;border:0">
                   <dialog id={"editModal" + ing.id} class="modal">
                     <div class="modal-box max-w-xl">
