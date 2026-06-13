@@ -25,7 +25,7 @@
         var priceFormatted = 'R ' + item.price.toFixed(2)
         var starchHtml = item.starch ? '<p><b>Choice of Starch</b> : ' + item.starch + '</p>' : ''
 
-        html += '<li class="wow fadeInUp" data-wow-duration="300ms" data-wow-delay="300ms">'
+        html += '<li>'
         html +=   '<div class="item">'
         html +=     '<div class="item-title">'
         html +=       '<h2>' + item.name + '</h2>'
@@ -42,10 +42,6 @@
       html += '</ul>'
       $container.append(html)
     })
-
-    if (window.WOW) {
-      new WOW().init()
-    }
   }
 
   function loadMenu() {

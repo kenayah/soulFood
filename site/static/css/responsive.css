@@ -297,6 +297,8 @@ px      68    160    252    */
     display: block;
     width: 100%;
     text-align: center;
+    padding: 14px 24px;
+    font-size: 15px;
   }
   /*--
     subscribe Start
