@@ -5,7 +5,7 @@ import { requireAdmin } from "../auth/middleware"
 import { loginForm, login } from "./pages/login"
 import { dashboard } from "./pages/dashboard"
 import { listOrders, orderDetail, updateStatus } from "./pages/orders"
-import { menu, createCategoryHandler, toggleCategory, createItemHandler, updateItemHandler, deleteItemHandler } from "./pages/menu"
+import { menu, createCategoryHandler, toggleCategory, reorderCategoryHandler, createItemHandler, updateItemHandler, deleteItemHandler } from "./pages/menu"
 import { stock, createIngredientHandler, adjustStockHandler, updateIngredientHandler } from "./pages/stock"
 import { reports } from "./pages/reports"
 import { customers } from "./pages/customers"
@@ -30,6 +30,7 @@ app.post("/orders/:id/status", updateStatus)
 app.get("/menu", menu)
 app.post("/menu/category", createCategoryHandler)
 app.post("/menu/category/:id/toggle", toggleCategory)
+app.post("/menu/category/:id/reorder", reorderCategoryHandler)
 app.post("/menu/item", createItemHandler)
 app.post("/menu/item/:id", updateItemHandler)
 app.post("/menu/item/:id/delete", deleteItemHandler)

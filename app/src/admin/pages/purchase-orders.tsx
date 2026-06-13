@@ -28,9 +28,17 @@ export async function purchaseOrders(c: Context) {
       {c.req.query("received") && <div class="alert alert-success mb-4">Purchase order received — stock updated.</div>}
       {c.req.query("error") && <div class="alert alert-error mb-4">{c.req.query("error")}</div>}
 
-      <div class="card bg-base-100 shadow mb-6 max-w-xl">
-        <div class="card-body">
-          <h5 class="card-title mb-3">New Purchase Order</h5>
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-lg font-semibold">All Purchase Orders</h3>
+        <button type="button" class="btn btn-primary btn-sm" onclick="newPoModal.showModal()">+ New PO</button>
+      </div>
+
+      <dialog id="newPoModal" class="modal">
+        <div class="modal-box max-w-xl">
+          <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          </form>
+          <h3 class="text-lg font-bold mb-4">New Purchase Order</h3>
           <form method="post" action="/admin/purchase-orders" id="poForm">
             <label class="form-control w-full mb-3">
               <span class="label-text">Supplier</span>
@@ -47,11 +55,6 @@ export async function purchaseOrders(c: Context) {
               <div class="po-item grid grid-cols-3 gap-2 mb-2">
                 <select name="ingredientId" class="select select-bordered select-sm" required>
                   <option value="">Ingredient...</option>
-                  {suppliers.length > 0 && (
-                    <>
-                      <option value="__select_ingredient" disabled>— select ingredient —</option>
-                    </>
-                  )}
                 </select>
                 <input name="quantityOrdered" type="number" step="0.01" class="input input-bordered input-sm" placeholder="Qty" required />
                 <input name="unitPrice" type="number" step="0.01" class="input input-bordered input-sm" placeholder="Unit price" required />
@@ -59,12 +62,16 @@ export async function purchaseOrders(c: Context) {
             </div>
             <button type="button" class="btn btn-sm btn-outline btn-secondary mb-3" onclick="addPOItem()">+ Add Item</button>
 
-            <div class="flex gap-2">
-              <button type="submit" class="btn btn-primary btn-sm">Create PO</button>
+            <div class="modal-action mt-0">
+              <button type="button" class="btn btn-ghost" onclick="newPoModal.close()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Create PO</button>
             </div>
           </form>
         </div>
-      </div>
+        <form method="dialog" class="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
 
       <script>
         {`
@@ -84,8 +91,6 @@ function addPOItem() {
 }
         `}
       </script>
-
-      <h3 class="text-lg font-semibold mb-2">All Purchase Orders</h3>
       <div class="overflow-x-auto">
         <table class="table table-zebra">
           <thead>

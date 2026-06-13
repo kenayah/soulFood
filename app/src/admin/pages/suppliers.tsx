@@ -16,82 +16,94 @@ export async function suppliers(c: Context) {
       {c.req.query("created") && <div class="alert alert-success mb-4">Supplier created.</div>}
       {c.req.query("updated") && <div class="alert alert-success mb-4">Supplier updated.</div>}
 
-      <div class="card bg-base-100 shadow mb-6 max-w-lg">
-        <div class="card-body">
-          {editSupplier ? (
-            <>
-              <div class="flex justify-between items-center mb-3">
-                <h5 class="card-title">Edit: {editSupplier.name}</h5>
-                <a href="/admin/suppliers" class="btn btn-sm btn-ghost">Cancel</a>
+      {editSupplier ? (
+        <div class="card bg-base-100 shadow mb-6 max-w-lg">
+          <div class="card-body">
+            <div class="flex justify-between items-center mb-3">
+              <h5 class="card-title">Edit: {editSupplier.name}</h5>
+              <a href="/admin/suppliers" class="btn btn-sm btn-ghost">Cancel</a>
+            </div>
+            <form method="post" action={"/admin/suppliers/" + editSupplier.id + "/update"}>
+              <label class="form-control w-full mb-2">
+                <span class="label-text">Name</span>
+                <input name="name" class="input input-bordered w-full" value={editSupplier.name} required />
+              </label>
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <label class="form-control">
+                  <span class="label-text">Contact person</span>
+                  <input name="contactPerson" class="input input-bordered w-full" value={editSupplier.contact_person ?? ""} />
+                </label>
+                <label class="form-control">
+                  <span class="label-text">Phone</span>
+                  <input name="phone" class="input input-bordered w-full" value={editSupplier.phone ?? ""} />
+                </label>
               </div>
-              <form method="post" action={"/admin/suppliers/" + editSupplier.id + "/update"}>
-                <label class="form-control w-full mb-2">
-                  <span class="label-text">Name</span>
-                  <input name="name" class="input input-bordered w-full" value={editSupplier.name} required />
+              <div class="grid grid-cols-2 gap-2 mb-3">
+                <label class="form-control">
+                  <span class="label-text">Email</span>
+                  <input name="email" type="email" class="input input-bordered w-full" value={editSupplier.email ?? ""} />
                 </label>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                  <label class="form-control">
-                    <span class="label-text">Contact person</span>
-                    <input name="contactPerson" class="input input-bordered w-full" value={editSupplier.contact_person ?? ""} />
-                  </label>
-                  <label class="form-control">
-                    <span class="label-text">Phone</span>
-                    <input name="phone" class="input input-bordered w-full" value={editSupplier.phone ?? ""} />
-                  </label>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mb-3">
-                  <label class="form-control">
-                    <span class="label-text">Email</span>
-                    <input name="email" type="email" class="input input-bordered w-full" value={editSupplier.email ?? ""} />
-                  </label>
-                  <label class="form-control">
-                    <span class="label-text">Lead time (days)</span>
-                    <input name="leadTimeDays" type="number" class="input input-bordered w-full" value={editSupplier.lead_time_days} />
-                  </label>
-                </div>
-                <label class="flex items-center gap-2 mb-3">
-                  <input type="checkbox" name="active" value="1" class="checkbox" checked={editSupplier.active ? true : false} />
-                  <span>Active</span>
-                </label>
-                <button type="submit" class="btn btn-primary btn-sm">Save</button>
-              </form>
-            </>
-          ) : (
-            <>
-              <h5 class="card-title mb-3">New Supplier</h5>
-              <form method="post" action="/admin/suppliers">
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                  <label class="form-control">
-                    <span class="label-text">Name</span>
-                    <input name="name" class="input input-bordered input-sm w-full" required />
-                  </label>
-                  <label class="form-control">
-                    <span class="label-text">Contact person</span>
-                    <input name="contactPerson" class="input input-bordered input-sm w-full" />
-                  </label>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                  <label class="form-control">
-                    <span class="label-text">Phone</span>
-                    <input name="phone" class="input input-bordered input-sm w-full" />
-                  </label>
-                  <label class="form-control">
-                    <span class="label-text">Email</span>
-                    <input name="email" type="email" class="input input-bordered input-sm w-full" />
-                  </label>
-                </div>
-                <label class="form-control w-full mb-2">
+                <label class="form-control">
                   <span class="label-text">Lead time (days)</span>
-                  <input name="leadTimeDays" type="number" class="input input-bordered input-sm w-full" defaultValue="1" />
+                  <input name="leadTimeDays" type="number" class="input input-bordered w-full" value={editSupplier.lead_time_days} />
                 </label>
-                <button type="submit" class="btn btn-primary btn-sm">Add Supplier</button>
-              </form>
-            </>
-          )}
+              </div>
+              <label class="flex items-center gap-2 mb-3">
+                <input type="checkbox" name="active" value="1" class="checkbox" checked={editSupplier.active ? true : false} />
+                <span>Active</span>
+              </label>
+              <button type="submit" class="btn btn-primary btn-sm">Save</button>
+            </form>
+          </div>
         </div>
+      ) : ""}
+
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-lg font-semibold">All Suppliers</h3>
+        <button type="button" class="btn btn-primary btn-sm" onclick="newSupplierModal.showModal()">+ New Supplier</button>
       </div>
 
-      <h3 class="text-lg font-semibold mb-2">All Suppliers</h3>
+      <dialog id="newSupplierModal" class="modal">
+        <div class="modal-box">
+          <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          </form>
+          <h3 class="text-lg font-bold mb-4">New Supplier</h3>
+          <form method="post" action="/admin/suppliers">
+            <label class="form-control w-full mb-2">
+              <span class="label-text">Name</span>
+              <input name="name" class="input input-bordered w-full" required />
+            </label>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+              <label class="form-control">
+                <span class="label-text">Contact person</span>
+                <input name="contactPerson" class="input input-bordered w-full" />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Phone</span>
+                <input name="phone" class="input input-bordered w-full" />
+              </label>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+              <label class="form-control">
+                <span class="label-text">Email</span>
+                <input name="email" type="email" class="input input-bordered w-full" />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Lead time (days)</span>
+                <input name="leadTimeDays" type="number" class="input input-bordered w-full" defaultValue="1" />
+              </label>
+            </div>
+            <div class="modal-action">
+              <button type="button" class="btn btn-ghost" onclick="newSupplierModal.close()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Add Supplier</button>
+            </div>
+          </form>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
       <div class="overflow-x-auto">
         <table class="table table-zebra">
           <thead>

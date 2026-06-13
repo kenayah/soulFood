@@ -44,18 +44,29 @@ export async function menu(c: Context) {
           <div class="overflow-x-auto">
             <table class="table table-sm">
               <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Sort</th>
-                  <th>Available</th>
-                  <th>Actions</th>
-                </tr>
+                  <tr>
+                    <th>Name</th>
+                    <th>Sort</th>
+                    <th>Reorder</th>
+                    <th>Available</th>
+                    <th>Actions</th>
+                  </tr>
               </thead>
               <tbody>
-                {categories.map((cat) => (
+                  {categories.map((cat, i) => (
                   <tr>
                     <td>{cat.name}</td>
                     <td>{cat.sort_order}</td>
+                    <td>
+                      <div class="flex gap-1">
+                        <form method="post" action={"/admin/menu/category/" + cat.id + "/reorder?direction=up"} class="inline">
+                          <button type="submit" class="btn btn-xs btn-ghost" disabled={i === 0} title="Move up">▲</button>
+                        </form>
+                        <form method="post" action={"/admin/menu/category/" + cat.id + "/reorder?direction=down"} class="inline">
+                          <button type="submit" class="btn btn-xs btn-ghost" disabled={i === categories.length - 1} title="Move down">▼</button>
+                        </form>
+                      </div>
+                    </td>
                     <td>{cat.available ? "Yes" : "No"}</td>
                     <td>
                       <form method="post" action={"/admin/menu/category/" + cat.id + "/toggle"} class="inline">
@@ -314,6 +325,29 @@ export async function toggleCategory(c: Context) {
   if (current) {
     await updateCategory(db, id, { available: !current.available })
   }
+  return c.redirect("/admin/menu?tab=categories")
+}
+
+export async function reorderCategoryHandler(c: Context) {
+  const id = parseInt(c.req.param("id")!)
+  const direction = c.req.query("direction")
+  if (direction !== "up" && direction !== "down") return c.redirect("/admin/menu?tab=categories")
+
+  const db = c.env.DB
+  const cats = await getCategories(db, true)
+  const idx = cats.findIndex((cat) => cat.id === id)
+  if (idx === -1) return c.redirect("/admin/menu?tab=categories")
+
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1
+  if (swapIdx < 0 || swapIdx >= cats.length) return c.redirect("/admin/menu?tab=categories")
+
+  const current = cats[idx]
+  const other = cats[swapIdx]
+  const tmpSort = current.sort_order
+
+  await updateCategory(db, current.id, { sortOrder: other.sort_order })
+  await updateCategory(db, other.id, { sortOrder: tmpSort })
+
   return c.redirect("/admin/menu?tab=categories")
 }
 

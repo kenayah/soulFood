@@ -6,9 +6,9 @@ const NAV_ITEMS = [
   { label: "Menu", path: "/admin/menu" },
   { label: "Stock", path: "/admin/stock" },
   { label: "Customers", path: "/admin/customers" },
-  { label: "Reports", path: "/admin/reports" },
   { label: "Suppliers", path: "/admin/suppliers" },
   { label: "PO", path: "/admin/purchase-orders" },
+  { label: "Reports", path: "/admin/reports" },
 ]
 
 const TW_CONFIG = `

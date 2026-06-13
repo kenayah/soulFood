@@ -42,132 +42,144 @@ export async function stock(c: Context) {
       {c.req.query("created") && <div class="alert alert-success mb-4">Ingredient created.</div>}
       {c.req.query("updated") && <div class="alert alert-success mb-4">Ingredient updated.</div>}
 
-      <div class="card bg-base-100 shadow mb-6">
-        <div class="card-body">
-          {editIngredient ? (
-            <>
-              <div class="flex justify-between items-center mb-3">
-                <h5 class="card-title">Edit: {editIngredient.name}</h5>
-                <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="btn btn-sm btn-ghost">Cancel</a>
+      {editIngredient && (
+        <div class="card bg-base-100 shadow mb-6">
+          <div class="card-body">
+            <div class="flex justify-between items-center mb-3">
+              <h5 class="card-title">Edit: {editIngredient.name}</h5>
+              <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="btn btn-sm btn-ghost">Cancel</a>
+            </div>
+            <form method="post" action={"/admin/stock/ingredient/" + editIngredient.id + "/update" + (categoryFilter ? "?category=" + categoryFilter : "")} class="grid grid-cols-1 md:grid-cols-5 gap-3">
+              <label class="form-control">
+                <span class="label-text">Name</span>
+                <input name="name" class="input input-bordered input-sm w-full" value={editIngredient.name} required />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Category</span>
+                <select name="categoryId" class="select select-bordered select-sm w-full">
+                  <option value="">Uncategorized</option>
+                  {categories.map((cat) => (
+                    <option value={cat.id} selected={cat.id === editIngredient.category_id}>{cat.name}</option>
+                  ))}
+                </select>
+              </label>
+              <label class="form-control">
+                <span class="label-text">Unit</span>
+                <input name="unit" class="input input-bordered input-sm w-full" value={editIngredient.unit} />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Stock</span>
+                <input name="currentStock" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.current_stock} />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Min level</span>
+                <input name="minStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.min_stock_level} />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Max level</span>
+                <input name="maxStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.max_stock_level ?? ""} />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Reorder qty</span>
+                <input name="reorderQuantity" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.reorder_quantity ?? ""} />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Unit cost (R)</span>
+                <input name="unitCost" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.unit_cost ?? ""} />
+              </label>
+              <label class="form-control">
+                <span class="label-text">Supplier</span>
+                <select name="supplierId" class="select select-bordered select-sm w-full">
+                  <option value="">No supplier</option>
+                  {suppliers.map((s) => (
+                    <option value={s.id} selected={s.id === editIngredient.supplier_id}>{s.name}</option>
+                  ))}
+                </select>
+              </label>
+              <div class="md:col-span-5 flex gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="btn btn-ghost btn-sm">Cancel</a>
               </div>
-              <form method="post" action={"/admin/stock/ingredient/" + editIngredient.id + "/update" + (categoryFilter ? "?category=" + categoryFilter : "")} class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                <label class="form-control">
-                  <span class="label-text">Name</span>
-                  <input name="name" class="input input-bordered input-sm w-full" value={editIngredient.name} required />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Category</span>
-                  <select name="categoryId" class="select select-bordered select-sm w-full">
-                    <option value="">Uncategorized</option>
-                    {categories.map((cat) => (
-                      <option value={cat.id} selected={cat.id === editIngredient.category_id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Unit</span>
-                  <input name="unit" class="input input-bordered input-sm w-full" value={editIngredient.unit} />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Stock</span>
-                  <input name="currentStock" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.current_stock} />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Min level</span>
-                  <input name="minStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.min_stock_level} />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Max level</span>
-                  <input name="maxStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.max_stock_level ?? ""} />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Reorder qty</span>
-                  <input name="reorderQuantity" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.reorder_quantity ?? ""} />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Unit cost (R)</span>
-                  <input name="unitCost" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.unit_cost ?? ""} />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Supplier</span>
-                  <select name="supplierId" class="select select-bordered select-sm w-full">
-                    <option value="">No supplier</option>
-                    {suppliers.map((s) => (
-                      <option value={s.id} selected={s.id === editIngredient.supplier_id}>{s.name}</option>
-                    ))}
-                  </select>
-                </label>
-                <div class="md:col-span-5 flex gap-2 mt-2">
-                  <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                  <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="btn btn-ghost btn-sm">Cancel</a>
-                </div>
-              </form>
-            </>
-          ) : (
-            <>
-              <h5 class="card-title mb-3">New Stock Item</h5>
-              <form method="post" action="/admin/stock/ingredient" class="grid grid-cols-1 md:grid-cols-6 gap-3">
-                <label class="form-control">
-                  <span class="label-text">Name</span>
-                  <input name="name" class="input input-bordered input-sm w-full" required />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Category</span>
-                  <select name="categoryId" class="select select-bordered select-sm w-full">
-                    <option value="">Select...</option>
-                    {categories.map((cat) => (
-                      <option value={cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Unit</span>
-                  <input name="unit" class="input input-bordered input-sm w-full" defaultValue="pieces" />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Stock</span>
-                  <input name="currentStock" type="number" step="0.01" class="input input-bordered input-sm w-full" defaultValue="0" />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Min level</span>
-                  <input name="minStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" defaultValue="0" />
-                </label>
-                <label class="form-control">
-                  <span class="label-text">Max level</span>
-                  <input name="maxStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" placeholder="Auto-calc reorder" />
-                </label>
-                <div class="md:col-span-6 flex gap-2">
-                  <label class="form-control flex-1">
-                    <span class="label-text">Supplier</span>
-                    <select name="supplierId" class="select select-bordered select-sm w-full">
-                      <option value="">No supplier</option>
-                      {suppliers.map((s) => (
-                        <option value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label class="form-control w-32">
-                    <span class="label-text">Reorder qty</span>
-                    <input name="reorderQuantity" type="number" step="0.01" class="input input-bordered input-sm w-full" placeholder="Auto" />
-                  </label>
-                  <div class="flex items-end">
-                    <button type="submit" class="btn btn-primary btn-sm">Add</button>
-                  </div>
-                </div>
-              </form>
-            </>
-          )}
+            </form>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div class="flex items-center gap-3 mb-3">
-        <h3 class="text-lg font-semibold">Stock Items</h3>
-        <div class="tabs tabs-boxed">
-          <a class={"tab tab-sm" + (!categoryFilter ? " tab-active" : "")} href="/admin/stock">All</a>
-          {categories.map((cat) => (
-            <a class={"tab tab-sm" + (categoryFilter === String(cat.id) ? " tab-active" : "")} href={"/admin/stock?category=" + cat.id}>{cat.name}</a>
-          ))}
+      <dialog id="newStockModal" class="modal">
+        <div class="modal-box max-w-xl">
+          <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          </form>
+          <h3 class="text-lg font-bold mb-4">New Stock Item</h3>
+          <form method="post" action="/admin/stock/ingredient" class="grid grid-cols-1 md:grid-cols-6 gap-3">
+            <label class="form-control">
+              <span class="label-text">Name</span>
+              <input name="name" class="input input-bordered input-sm w-full" required />
+            </label>
+            <label class="form-control">
+              <span class="label-text">Category</span>
+              <select name="categoryId" class="select select-bordered select-sm w-full">
+                <option value="">Select...</option>
+                {categories.map((cat) => (
+                  <option value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </label>
+            <label class="form-control">
+              <span class="label-text">Unit</span>
+              <input name="unit" class="input input-bordered input-sm w-full" defaultValue="pieces" />
+            </label>
+            <label class="form-control">
+              <span class="label-text">Stock</span>
+              <input name="currentStock" type="number" step="0.01" class="input input-bordered input-sm w-full" defaultValue="0" />
+            </label>
+            <label class="form-control">
+              <span class="label-text">Min level</span>
+              <input name="minStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" defaultValue="0" />
+            </label>
+            <label class="form-control">
+              <span class="label-text">Max level</span>
+              <input name="maxStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" placeholder="Auto-calc reorder" />
+            </label>
+            <div class="md:col-span-6 flex gap-2">
+              <label class="form-control flex-1">
+                <span class="label-text">Supplier</span>
+                <select name="supplierId" class="select select-bordered select-sm w-full">
+                  <option value="">No supplier</option>
+                  {suppliers.map((s) => (
+                    <option value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </label>
+              <label class="form-control w-32">
+                <span class="label-text">Reorder qty</span>
+                <input name="reorderQuantity" type="number" step="0.01" class="input input-bordered input-sm w-full" placeholder="Auto" />
+              </label>
+              <div class="flex items-end">
+                <button type="submit" class="btn btn-primary btn-sm">Add</button>
+              </div>
+            </div>
+          </form>
+          <div class="modal-action">
+            <button type="button" class="btn btn-ghost" onclick="newStockModal.close()">Cancel</button>
+          </div>
         </div>
+        <form method="dialog" class="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+
+      <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
+        <div class="flex items-center gap-3">
+          <h3 class="text-lg font-semibold">Stock Items</h3>
+          <div class="tabs tabs-boxed">
+            <a class={"tab tab-sm" + (!categoryFilter ? " tab-active" : "")} href="/admin/stock">All</a>
+            {categories.map((cat) => (
+              <a class={"tab tab-sm" + (categoryFilter === String(cat.id) ? " tab-active" : "")} href={"/admin/stock?category=" + cat.id}>{cat.name}</a>
+            ))}
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="newStockModal.showModal()">+ New Stock Item</button>
       </div>
 
       <div class="overflow-x-auto">
