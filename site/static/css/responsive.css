@@ -293,6 +293,11 @@ px      68    160    252    */
     float: inherit;
     padding: 28px 100px;
   }
+  #price .block .pricing-list ul li .item .add-to-cart {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
   /*--
     subscribe Start
 --*/

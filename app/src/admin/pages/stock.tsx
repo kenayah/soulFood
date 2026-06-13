@@ -1,7 +1,7 @@
 import type { Context } from "hono"
 import { AdminLayout } from "../layout"
 import {
-  getIngredients,
+  getIngredientsPaginated,
   getStockCategories,
   getSuppliers,
   createIngredient,
@@ -9,17 +9,23 @@ import {
   getStockMovements,
   updateIngredient,
 } from "../../features/stock/service"
+import { Pagination } from "../components/pagination"
 
 export async function stock(c: Context) {
   const db = c.env.DB
   const categories = await getStockCategories(db)
-  const ingredients = await getIngredients(db)
   const suppliers = await getSuppliers(db)
 
   const categoryFilter = c.req.query("category")
-  const filteredIngredients = categoryFilter
-    ? ingredients.filter((i) => i.category_id === parseInt(categoryFilter))
-    : ingredients
+  const page = parseInt(c.req.query("page") || "1")
+  const limit = 20
+
+  const { items: ingredients, total } = await getIngredientsPaginated(
+    db,
+    page,
+    limit,
+    categoryFilter ? parseInt(categoryFilter) : null,
+  )
 
   const viewMovements = c.req.query("movements")
   const movements = viewMovements
@@ -169,15 +175,13 @@ export async function stock(c: Context) {
         </form>
       </dialog>
 
+      <h3 class="text-lg font-semibold mb-2">Stock Items</h3>
       <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
-        <div class="flex items-center gap-3">
-          <h3 class="text-lg font-semibold">Stock Items</h3>
-          <div class="tabs tabs-boxed">
-            <a class={"tab tab-sm" + (!categoryFilter ? " tab-active" : "")} href="/admin/stock">All</a>
-            {categories.map((cat) => (
-              <a class={"tab tab-sm" + (categoryFilter === String(cat.id) ? " tab-active" : "")} href={"/admin/stock?category=" + cat.id}>{cat.name}</a>
-            ))}
-          </div>
+        <div class="tabs tabs-boxed">
+          <a class={"tab tab-sm" + (!categoryFilter ? " tab-active" : "")} href="/admin/stock">All</a>
+          {categories.map((cat) => (
+            <a class={"tab tab-sm" + (categoryFilter === String(cat.id) ? " tab-active" : "")} href={"/admin/stock?category=" + cat.id}>{cat.name}</a>
+          ))}
         </div>
         <button type="button" class="btn btn-primary btn-sm" onclick="newStockModal.showModal()">+ New Stock Item</button>
       </div>
@@ -199,7 +203,7 @@ export async function stock(c: Context) {
             </tr>
           </thead>
           <tbody>
-            {filteredIngredients.map((ing) => {
+            {ingredients.map((ing) => {
               const isLow = ing.current_stock <= ing.min_stock_level
               const suggestedReorder = ing.max_stock_level
                 ? Math.max(0, ing.max_stock_level - ing.current_stock)
@@ -242,6 +246,8 @@ export async function stock(c: Context) {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} total={total} limit={limit} baseUrl="/admin/stock" additionalParams={categoryFilter ? { category: categoryFilter } : undefined} />
 
       {movements && movementIngredient && (
         <dialog id="movementsModal" class="modal modal-open">

@@ -1,6 +1,7 @@
 import type { Context } from "hono"
 import { AdminLayout } from "../layout"
 import { getOrders, getOrderById, getOrderItems, getOrderStatusLog, updateOrderStatus } from "../../features/orders/service"
+import { Pagination } from "../components/pagination"
 
 const STATUS_FLOW = ["placed", "confirmed", "preparing", "ready", "out_for_delivery", "delivered"]
 
@@ -19,8 +20,10 @@ function statusBadge(status: string) {
 
 export async function listOrders(c: Context) {
   const db = c.env.DB
+  const page = parseInt(c.req.query("page") || "1")
+  const limit = 20
   const status = c.req.query("status")
-  const { orders } = await getOrders(db, { status, limit: 50 })
+  const { orders, total } = await getOrders(db, { status, page, limit })
 
   return c.html(
     <AdminLayout title="Orders" currentPath="/admin/orders">
@@ -68,6 +71,8 @@ export async function listOrders(c: Context) {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} total={total} limit={limit} baseUrl="/admin/orders" additionalParams={status ? { status } : undefined} />
     </AdminLayout>,
   )
 }

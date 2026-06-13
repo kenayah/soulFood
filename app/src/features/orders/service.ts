@@ -240,13 +240,61 @@ export async function getOrderStatusLog(
 
 export async function getCustomers(
   db: D1Database,
-  limit: number = 50,
-): Promise<CustomerRow[]> {
-  return queryAll<CustomerRow>(
+  page: number = 1,
+  limit: number = 20,
+): Promise<{ customers: CustomerRow[]; total: number }> {
+  const offset = (page - 1) * limit
+  const totalResult = await queryOne<{ count: number }>(
     db,
-    "SELECT * FROM customers ORDER BY last_order_at DESC NULLS LAST LIMIT ?",
+    "SELECT COUNT(*) as count FROM customers",
+  )
+  const total = totalResult?.count ?? 0
+
+  const customers = await queryAll<CustomerRow>(
+    db,
+    "SELECT * FROM customers ORDER BY last_order_at DESC NULLS LAST LIMIT ? OFFSET ?",
+    limit,
+    offset,
+  )
+  return { customers, total }
+}
+
+export async function getCustomerById(db: D1Database, id: number): Promise<CustomerRow | null> {
+  return queryOne<CustomerRow>(db, "SELECT * FROM customers WHERE id = ?", id)
+}
+
+export async function getOrdersByCustomer(
+  db: D1Database,
+  customerId: number,
+  limit: number = 20,
+): Promise<OrderRow[]> {
+  return queryAll<OrderRow>(
+    db,
+    "SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC LIMIT ?",
+    customerId,
     limit,
   )
+}
+
+export async function updateCustomer(
+  db: D1Database,
+  id: number,
+  data: { name?: string; phone?: string; deliveryAddress?: string; notes?: string },
+): Promise<CustomerRow | null> {
+  const sets: string[] = []
+  const params: unknown[] = []
+
+  if (data.name !== undefined) { sets.push("name = ?"); params.push(data.name) }
+  if (data.phone !== undefined) { sets.push("phone = ?"); params.push(data.phone) }
+  if (data.deliveryAddress !== undefined) { sets.push("delivery_address = ?"); params.push(data.deliveryAddress) }
+  if (data.notes !== undefined) { sets.push("notes = ?"); params.push(data.notes) }
+
+  if (sets.length === 0) return getCustomerById(db, id)
+
+  sets.push("updated_at = datetime('now')")
+  params.push(id)
+  await execute(db, `UPDATE customers SET ${sets.join(", ")} WHERE id = ?`, ...params)
+  return getCustomerById(db, id)
 }
 
 export async function getDashboardStats(db: D1Database): Promise<{

@@ -1,6 +1,7 @@
 import type { Context } from "hono"
 import { AdminLayout } from "../layout"
-import { getCategories, getMenuItems, getMenuItemById, createCategory, updateCategory, createMenuItem, updateMenuItem, deleteMenuItem } from "../../features/menu/service"
+import { getCategories, getMenuItems, getMenuItemsPaginated, getMenuItemById, createCategory, updateCategory, createMenuItem, updateMenuItem, deleteMenuItem } from "../../features/menu/service"
+import { Pagination } from "../components/pagination"
 
 export async function menu(c: Context) {
   const db = c.env.DB

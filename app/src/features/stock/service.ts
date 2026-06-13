@@ -38,6 +38,41 @@ export async function getIngredients(db: D1Database, belowMin?: boolean): Promis
   return queryAll<IngredientRow>(db, sql)
 }
 
+export async function getIngredientsPaginated(
+  db: D1Database,
+  page: number = 1,
+  limit: number = 20,
+  categoryId?: number | null,
+): Promise<{ items: IngredientRow[]; total: number }> {
+  const offset = (page - 1) * limit
+  let whereClause = ""
+  const params: unknown[] = []
+
+  if (categoryId) {
+    whereClause = "WHERE i.category_id = ?"
+    params.push(categoryId)
+  }
+
+  const totalResult = await queryOne<{ count: number }>(
+    db,
+    `SELECT COUNT(*) as count FROM ingredients i ${whereClause}`,
+    ...params,
+  )
+  const total = totalResult?.count ?? 0
+
+  const items = await queryAll<IngredientRow>(
+    db,
+    `SELECT i.*, sc.name as category_name FROM ingredients i
+     LEFT JOIN stock_categories sc ON i.category_id = sc.id
+     ${whereClause} ORDER BY sc.sort_order, i.name LIMIT ? OFFSET ?`,
+    ...params,
+    limit,
+    offset,
+  )
+
+  return { items, total }
+}
+
 export async function createIngredient(
   db: D1Database,
   data: {

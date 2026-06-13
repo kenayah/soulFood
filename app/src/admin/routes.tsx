@@ -8,7 +8,7 @@ import { listOrders, orderDetail, updateStatus } from "./pages/orders"
 import { menu, createCategoryHandler, toggleCategory, reorderCategoryHandler, createItemHandler, updateItemHandler, deleteItemHandler } from "./pages/menu"
 import { stock, createIngredientHandler, adjustStockHandler, updateIngredientHandler } from "./pages/stock"
 import { reports } from "./pages/reports"
-import { customers } from "./pages/customers"
+import { customers, updateCustomerHandler } from "./pages/customers"
 import { suppliers, createSupplierHandler, updateSupplierHandler } from "./pages/suppliers"
 import { purchaseOrders, createPurchaseOrderHandler, receivePurchaseOrderHandler } from "./pages/purchase-orders"
 
@@ -40,6 +40,7 @@ app.post("/stock/ingredient/:id/adjust", adjustStockHandler)
 app.post("/stock/ingredient/:id/update", updateIngredientHandler)
 app.get("/reports", reports)
 app.get("/customers", customers)
+app.post("/customers/:id/update", updateCustomerHandler)
 app.get("/suppliers", suppliers)
 app.post("/suppliers", createSupplierHandler)
 app.post("/suppliers/:id/update", updateSupplierHandler)

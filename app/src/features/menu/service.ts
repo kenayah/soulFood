@@ -83,6 +83,39 @@ export async function getMenuItems(
   return queryAll<MenuItemRow>(db, sql)
 }
 
+export async function getMenuItemsPaginated(
+  db: D1Database,
+  page: number = 1,
+  limit: number = 20,
+  categoryId?: number,
+): Promise<{ items: MenuItemRow[]; total: number }> {
+  const offset = (page - 1) * limit
+  let whereClause = ""
+  const params: unknown[] = []
+
+  if (categoryId) {
+    whereClause = "WHERE category_id = ?"
+    params.push(categoryId)
+  }
+
+  const totalResult = await queryOne<{ count: number }>(
+    db,
+    `SELECT COUNT(*) as count FROM menu_items ${whereClause}`,
+    ...params,
+  )
+  const total = totalResult?.count ?? 0
+
+  const items = await queryAll<MenuItemRow>(
+    db,
+    `SELECT * FROM menu_items ${whereClause} ORDER BY category_id, id LIMIT ? OFFSET ?`,
+    ...params,
+    limit,
+    offset,
+  )
+
+  return { items, total }
+}
+
 export async function createMenuItem(
   db: D1Database,
   data: {
