@@ -122,8 +122,7 @@ export async function stock(c: Context) {
         <table class="table table-zebra">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Category</th>
+              <th>Item</th>
               <th>Unit</th>
               <th>Stock</th>
               <th>Min</th>
@@ -141,8 +140,7 @@ export async function stock(c: Context) {
                 : null
               return <>
                 <tr class={isLow ? "bg-error/10" : ""}>
-                  <td>{ing.name}</td>
-                  <td><span class="badge badge-ghost badge-sm">{ing.category_name ?? "—"}</span></td>
+                  <td>{ing.name}<br/><span class="text-xs text-base-content/60">{ing.category_name ?? "—"}</span></td>
                   <td>{ing.unit}</td>
                   <td class="font-mono">{ing.current_stock}</td>
                   <td class="font-mono">{ing.min_stock_level}</td>
