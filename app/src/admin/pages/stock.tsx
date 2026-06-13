@@ -35,11 +35,6 @@ export async function stock(c: Context) {
     ? ingredients.find((i) => i.id === parseInt(viewMovements))
     : null
 
-  const editId = c.req.query("edit")
-  const editIngredient = editId
-    ? ingredients.find((i) => i.id === parseInt(editId))
-    : null
-
   return c.html(
     <AdminLayout title="Stock" currentPath="/admin/stock">
       <h1 class="text-2xl font-bold mb-4">Stock Management</h1>
@@ -47,69 +42,6 @@ export async function stock(c: Context) {
       {c.req.query("adjusted") && <div class="alert alert-success mb-4">Stock adjusted.</div>}
       {c.req.query("created") && <div class="alert alert-success mb-4">Ingredient created.</div>}
       {c.req.query("updated") && <div class="alert alert-success mb-4">Ingredient updated.</div>}
-
-      {editIngredient && (
-        <div class="card bg-base-100 shadow mb-6">
-          <div class="card-body">
-            <div class="flex justify-between items-center mb-3">
-              <h5 class="card-title">Edit: {editIngredient.name}</h5>
-              <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="btn btn-sm btn-ghost">Cancel</a>
-            </div>
-            <form method="post" action={"/admin/stock/ingredient/" + editIngredient.id + "/update" + (categoryFilter ? "?category=" + categoryFilter : "")} class="grid grid-cols-1 md:grid-cols-5 gap-3">
-              <label class="form-control">
-                <span class="label-text">Name</span>
-                <input name="name" class="input input-bordered input-sm w-full" value={editIngredient.name} required />
-              </label>
-              <label class="form-control">
-                <span class="label-text">Category</span>
-                <select name="categoryId" class="select select-bordered select-sm w-full">
-                  <option value="">Uncategorized</option>
-                  {categories.map((cat) => (
-                    <option value={cat.id} selected={cat.id === editIngredient.category_id}>{cat.name}</option>
-                  ))}
-                </select>
-              </label>
-              <label class="form-control">
-                <span class="label-text">Unit</span>
-                <input name="unit" class="input input-bordered input-sm w-full" value={editIngredient.unit} />
-              </label>
-              <label class="form-control">
-                <span class="label-text">Stock</span>
-                <input name="currentStock" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.current_stock} />
-              </label>
-              <label class="form-control">
-                <span class="label-text">Min level</span>
-                <input name="minStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.min_stock_level} />
-              </label>
-              <label class="form-control">
-                <span class="label-text">Max level</span>
-                <input name="maxStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.max_stock_level ?? ""} />
-              </label>
-              <label class="form-control">
-                <span class="label-text">Reorder qty</span>
-                <input name="reorderQuantity" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.reorder_quantity ?? ""} />
-              </label>
-              <label class="form-control">
-                <span class="label-text">Unit cost (R)</span>
-                <input name="unitCost" type="number" step="0.01" class="input input-bordered input-sm w-full" value={editIngredient.unit_cost ?? ""} />
-              </label>
-              <label class="form-control">
-                <span class="label-text">Supplier</span>
-                <select name="supplierId" class="select select-bordered select-sm w-full">
-                  <option value="">No supplier</option>
-                  {suppliers.map((s) => (
-                    <option value={s.id} selected={s.id === editIngredient.supplier_id}>{s.name}</option>
-                  ))}
-                </select>
-              </label>
-              <div class="md:col-span-5 flex gap-2 mt-2">
-                <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="btn btn-ghost btn-sm">Cancel</a>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       <dialog id="newStockModal" class="modal">
         <div class="modal-box max-w-xl">
@@ -208,7 +140,7 @@ export async function stock(c: Context) {
               const suggestedReorder = ing.max_stock_level
                 ? Math.max(0, ing.max_stock_level - ing.current_stock)
                 : null
-              return (
+              return <>
                 <tr class={isLow ? "bg-error/10" : ""}>
                   <td>{ing.name}</td>
                   <td><span class="badge badge-ghost badge-sm">{ing.category_name ?? "—"}</span></td>
@@ -230,18 +162,109 @@ export async function stock(c: Context) {
                     )}
                   </td>
                   <td>
-                    <form method="post" action={"/admin/stock/ingredient/" + ing.id + "/adjust"} class="flex gap-1 max-w-56">
-                      <input name="adjustment" type="number" step="0.01" class="input input-bordered input-sm w-full" placeholder="+/- qty" required />
-                      <input name="reason" class="input input-bordered input-sm w-24" placeholder="Reason" />
-                      <button type="submit" class="btn btn-sm btn-outline btn-primary">Go</button>
-                    </form>
+                    <button type="button" class="btn btn-sm btn-outline btn-primary" onclick={"adjustModal" + ing.id + ".showModal()"}>Adjust</button>
                   </td>
                   <td>
-                    <a href={"/admin/stock?edit=" + ing.id + (categoryFilter ? "&category=" + categoryFilter : "")} class="btn btn-sm btn-ghost">Edit</a>
+                    <button type="button" class="btn btn-sm btn-ghost" onclick={"editModal" + ing.id + ".showModal()"}>Edit</button>
                     <a href={"/admin/stock?movements=" + ing.id} class="btn btn-sm btn-ghost">Log</a>
                   </td>
                 </tr>
-              )
+                <tr><td colspan={10} style="padding:0;border:0">
+                  <dialog id={"editModal" + ing.id} class="modal">
+                    <div class="modal-box max-w-xl">
+                      <form method="dialog">
+                        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                      </form>
+                      <h3 class="text-lg font-bold mb-4">Edit: {ing.name}</h3>
+                      <form method="post" action={"/admin/stock/ingredient/" + ing.id + "/update" + (categoryFilter ? "?category=" + categoryFilter : "")} class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                        <label class="form-control">
+                          <span class="label-text">Name</span>
+                          <input name="name" class="input input-bordered input-sm w-full" value={ing.name} required />
+                        </label>
+                        <label class="form-control">
+                          <span class="label-text">Category</span>
+                          <select name="categoryId" class="select select-bordered select-sm w-full">
+                            <option value="">Uncategorized</option>
+                            {categories.map((cat) => (
+                              <option value={cat.id} selected={cat.id === ing.category_id}>{cat.name}</option>
+                            ))}
+                          </select>
+                        </label>
+                        <label class="form-control">
+                          <span class="label-text">Unit</span>
+                          <input name="unit" class="input input-bordered input-sm w-full" value={ing.unit} />
+                        </label>
+                        <label class="form-control">
+                          <span class="label-text">Stock</span>
+                          <input name="currentStock" type="number" step="0.01" class="input input-bordered input-sm w-full" value={ing.current_stock} />
+                        </label>
+                        <label class="form-control">
+                          <span class="label-text">Min level</span>
+                          <input name="minStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" value={ing.min_stock_level} />
+                        </label>
+                        <label class="form-control">
+                          <span class="label-text">Max level</span>
+                          <input name="maxStockLevel" type="number" step="0.01" class="input input-bordered input-sm w-full" value={ing.max_stock_level ?? ""} />
+                        </label>
+                        <label class="form-control">
+                          <span class="label-text">Reorder qty</span>
+                          <input name="reorderQuantity" type="number" step="0.01" class="input input-bordered input-sm w-full" value={ing.reorder_quantity ?? ""} />
+                        </label>
+                        <label class="form-control">
+                          <span class="label-text">Unit cost (R)</span>
+                          <input name="unitCost" type="number" step="0.01" class="input input-bordered input-sm w-full" value={ing.unit_cost ?? ""} />
+                        </label>
+                        <label class="form-control">
+                          <span class="label-text">Supplier</span>
+                          <select name="supplierId" class="select select-bordered select-sm w-full">
+                            <option value="">No supplier</option>
+                            {suppliers.map((s) => (
+                              <option value={s.id} selected={s.id === ing.supplier_id}>{s.name}</option>
+                            ))}
+                          </select>
+                        </label>
+                        <div class="md:col-span-5 flex gap-2 mt-2">
+                          <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        </div>
+                      </form>
+                      <div class="modal-action">
+                        <button type="button" class="btn btn-ghost" onclick={"editModal" + ing.id + ".close()"}>Cancel</button>
+                      </div>
+                    </div>
+                    <form method="dialog" class="modal-backdrop">
+                      <button>close</button>
+                    </form>
+                  </dialog>
+                </td></tr>
+                <tr><td colspan={10} style="padding:0;border:0">
+                  <dialog id={"adjustModal" + ing.id} class="modal">
+                    <div class="modal-box max-w-sm">
+                      <form method="dialog">
+                        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                      </form>
+                      <h3 class="text-lg font-bold mb-4">Adjust Stock — {ing.name}</h3>
+                      <p class="text-sm text-base-content/60 mb-3">Current stock: <strong>{ing.current_stock}</strong> {ing.unit}</p>
+                      <form method="post" action={"/admin/stock/ingredient/" + ing.id + "/adjust" + (categoryFilter ? "?category=" + categoryFilter : "")}>
+                        <label class="form-control w-full mb-3">
+                          <span class="label-text">Adjustment (+/-)</span>
+                          <input name="adjustment" type="number" step="0.01" class="input input-bordered w-full" placeholder="e.g. 10 or -5" required />
+                        </label>
+                        <label class="form-control w-full mb-3">
+                          <span class="label-text">Reason</span>
+                          <input name="reason" class="input input-bordered w-full" placeholder="e.g. Delivery, spoilage" />
+                        </label>
+                        <div class="modal-action">
+                          <button type="button" class="btn btn-ghost" onclick={"adjustModal" + ing.id + ".close()"}>Cancel</button>
+                          <button type="submit" class="btn btn-primary">Apply</button>
+                        </div>
+                      </form>
+                    </div>
+                    <form method="dialog" class="modal-backdrop">
+                      <button>close</button>
+                    </form>
+                  </dialog>
+                </td></tr>
+              </>
             })}
           </tbody>
         </table>
@@ -288,10 +311,10 @@ export async function stock(c: Context) {
               </table>
             </div>
             <div class="modal-action">
-              <a href="/admin/stock" class="btn btn-sm">Close</a>
+              <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="btn btn-sm">Close</a>
             </div>
           </div>
-          <a href="/admin/stock" class="modal-backdrop">Close</a>
+          <a href={"/admin/stock" + (categoryFilter ? "?category=" + categoryFilter : "")} class="modal-backdrop">Close</a>
         </dialog>
       )}
     </AdminLayout>,
@@ -326,8 +349,9 @@ export async function adjustStockHandler(c: Context) {
   }
 
   try {
+    const categoryRedirect = c.req.query("category") ? "&category=" + c.req.query("category") : ""
     await adjustStock(db, id, adjustment, reason)
-    return c.redirect("/admin/stock?adjusted=1")
+    return c.redirect("/admin/stock?adjusted=1" + categoryRedirect)
   } catch (err) {
     return c.text((err as Error).message, 400)
   }
