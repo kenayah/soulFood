@@ -120,7 +120,7 @@ export async function suppliers(c: Context) {
           <tbody>
             {list.map((s) => (<>
               <tr>
-                <td>{s.name}<br/><span class="text-xs text-base-content/60 lg:hidden">{s.active ? <span class="badge badge-success badge-sm">Active</span> : <span class="badge badge-ghost badge-sm">Inactive</span>}</span></td>
+                <td><span class="block text-right lg:hidden text-xs text-base-content/60 mb-0.5">{s.active ? <span class="badge badge-success badge-sm">Active</span> : <span class="badge badge-ghost badge-sm">Inactive</span>}</span>{s.name}</td>
                 <td>{s.contact_person ?? "—"}</td>
                 <td>{s.phone ?? "—"}</td>
                 <td>{s.email ?? "—"}</td>
