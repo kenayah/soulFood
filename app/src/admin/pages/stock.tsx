@@ -140,7 +140,7 @@ export async function stock(c: Context) {
                 : null
               return <>
                 <tr class={isLow ? "bg-error/10" : ""}>
-                  <td>{!categoryFilter && <span class="block text-right lg:hidden text-xs text-base-content/60 mb-0.5">{ing.category_name ?? "—"}</span>}{ing.name}</td>
+                  <td>{ing.name}{!categoryFilter && <><br/><span class="text-xs text-base-content/60">{ing.category_name ?? "—"}</span></>}</td>
                   <td>{ing.unit}</td>
                   <td class="font-mono">{ing.current_stock}</td>
                   <td class="font-mono">{ing.min_stock_level}</td>
