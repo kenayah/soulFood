@@ -140,7 +140,7 @@ export async function stock(c: Context) {
                 : null
               return <>
                 <tr class={isLow ? "bg-error/10" : ""}>
-                  <td>{ing.name}{!categoryFilter && <><br/><span class="text-xs text-base-content/60 max-lg:hidden">{ing.category_name ?? "—"}</span></>}</td>
+                  <td>{!categoryFilter && <span class="block text-right lg:hidden text-xs text-base-content/60 mb-0.5">{ing.category_name ?? "—"}</span>}{ing.name}</td>
                   <td>{ing.unit}</td>
                   <td class="font-mono">{ing.current_stock}</td>
                   <td class="font-mono">{ing.min_stock_level}</td>
@@ -153,9 +153,9 @@ export async function stock(c: Context) {
                   </td>
                   <td>
                     {isLow ? (
-                      <span class="badge badge-error">Reorder</span>
+                      <span class="badge badge-error text-white">Reorder</span>
                     ) : (
-                      <span class="badge badge-success">OK</span>
+                      <span class="badge badge-success text-white">OK</span>
                     )}
                   </td>
                   <td>
@@ -167,7 +167,7 @@ export async function stock(c: Context) {
                   </td>
                   <td></td>
                 </tr>
-                {!categoryFilter && <tr class="lg:hidden"><td colspan={10} class="text-xs text-base-content/60 pb-1 pt-0">Category: {ing.category_name ?? "—"}</td></tr>}
+                
                 <tr><td colspan={10} style="padding:0;border:0">
                   <dialog id={"editModal" + ing.id} class="modal">
                     <div class="modal-box max-w-xl">
