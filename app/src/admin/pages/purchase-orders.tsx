@@ -111,11 +111,11 @@ function addPOItem() {
                 <td>{po.supplier_name}</td>
                 <td>
                   {po.status === "received" ? (
-                    <span class="badge badge-success">Received</span>
+                    <span class="badge badge-success text-white">Received</span>
                   ) : po.status === "draft" ? (
                     <span class="badge badge-ghost">Draft</span>
                   ) : po.status === "sent" ? (
-                    <span class="badge badge-info">Sent</span>
+                    <span class="badge badge-info text-white">Sent</span>
                   ) : (
                     <span class="badge badge-ghost">{po.status}</span>
                   )}

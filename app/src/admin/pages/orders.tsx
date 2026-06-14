@@ -15,7 +15,7 @@ function statusBadge(status: string) {
     ready: "primary",
     out_for_delivery: "info",
   }
-  return <span class={"badge badge-" + (colors[status] ?? "neutral")}>{status}</span>
+  return <span class={"badge text-white badge-" + (colors[status] ?? "neutral")}>{status}</span>
 }
 
 export async function listOrders(c: Context) {

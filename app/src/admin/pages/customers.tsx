@@ -71,7 +71,7 @@ export async function customers(c: Context) {
                         {customerOrders.map((o) => (
                           <tr>
                             <td class="font-mono">#{o.id}</td>
-                            <td><span class={"badge badge-sm " + (
+                            <td><span class={"badge badge-sm text-white " + (
                               o.status === "delivered" ? "badge-success" :
                               o.status === "cancelled" ? "badge-error" :
                               o.status === "placed" ? "badge-info" :
