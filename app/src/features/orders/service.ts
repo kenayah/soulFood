@@ -297,12 +297,13 @@ export async function updateCustomer(
   return getCustomerById(db, id)
 }
 
-export async function getDashboardStats(db: D1Database): Promise<{
+export async function getDashboardStats(db: D1Database, page = 1, limit = 10): Promise<{
   todayOrders: number
   todayRevenue: number
   pendingOrders: number
   preparingOrders: number
   recentOrders: OrderRow[]
+  recentTotal: number
 }> {
   const today = await queryOne<{ orders: number; revenue: number }>(
     db,
@@ -320,9 +321,16 @@ export async function getDashboardStats(db: D1Database): Promise<{
     "SELECT COUNT(*) as count FROM orders WHERE status IN ('confirmed', 'preparing')",
   )
 
+  const totalCount = await queryOne<{ count: number }>(
+    db,
+    "SELECT COUNT(*) as count FROM orders",
+  )
+
+  const offset = (page - 1) * limit
   const recent = await queryAll<OrderRow>(
     db,
-    "SELECT * FROM orders ORDER BY created_at DESC LIMIT 10",
+    `SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+    limit, offset,
   )
 
   return {
@@ -331,5 +339,6 @@ export async function getDashboardStats(db: D1Database): Promise<{
     pendingOrders: pending?.count ?? 0,
     preparingOrders: preparing?.count ?? 0,
     recentOrders: recent,
+    recentTotal: totalCount?.count ?? 0,
   }
 }

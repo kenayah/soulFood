@@ -1,10 +1,13 @@
 import type { Context } from "hono"
 import { AdminLayout } from "../layout"
 import { getDashboardStats } from "../../features/orders/service"
+import { Pagination } from "../components/pagination"
 
 export async function dashboard(c: Context) {
   const db = c.env.DB
-  const stats = await getDashboardStats(db)
+  const page = parseInt(c.req.query("page") || "1")
+  const limit = 10
+  const stats = await getDashboardStats(db, page, limit)
 
   return c.html(
     <AdminLayout title="Dashboard" currentPath="/admin/dashboard">
@@ -46,7 +49,7 @@ export async function dashboard(c: Context) {
                 <td><a href={"/admin/orders/" + order.id} class="link link-primary">{order.id}</a></td>
                 <td>{order.customer_name}</td>
                 <td>
-                  <span class={"badge badge-" + (
+                  <span class={"badge text-white badge-" + (
                     order.status === "delivered" ? "success" :
                     order.status === "placed" ? "warning" :
                     order.status === "cancelled" ? "error" : "info"
@@ -59,6 +62,8 @@ export async function dashboard(c: Context) {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} total={stats.recentTotal} limit={limit} baseUrl="/admin/dashboard" />
     </AdminLayout>,
   )
 }
