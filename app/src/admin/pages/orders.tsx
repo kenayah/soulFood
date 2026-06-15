@@ -22,7 +22,7 @@ function statusBadge(status: string) {
 export async function listOrders(c: Context) {
   const db = c.env.DB
   const page = parseInt(c.req.query("page") || "1")
-  const limit = 20
+  const limit = 7
   const status = c.req.query("status")
   const { orders, total } = await getOrders(db, { status, page, limit })
 

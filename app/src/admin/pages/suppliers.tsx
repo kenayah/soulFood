@@ -1,6 +1,7 @@
 import type { Context } from "hono"
 import { AdminLayout } from "../layout"
 import { getSuppliers, createSupplier, updateSupplier } from "../../features/stock/service"
+import { Pagination } from "../components/pagination"
 
 export async function suppliers(c: Context) {
   const db = c.env.DB
@@ -8,6 +9,12 @@ export async function suppliers(c: Context) {
 
   const editId = c.req.query("edit")
   const editSupplier = editId ? list.find((s) => s.id === parseInt(editId)) : null
+
+  const page = parseInt(c.req.query("page") || "1")
+  const limit = 5
+  const total = list.length
+  const offset = (page - 1) * limit
+  const paged = list.slice(offset, offset + limit)
 
   return c.html(
     <AdminLayout title="Suppliers" currentPath="/admin/suppliers">
@@ -118,7 +125,7 @@ export async function suppliers(c: Context) {
             </tr>
           </thead>
           <tbody>
-            {list.map((s) => (<>
+            {paged.map((s) => (<>
               <tr>
                 <td><span class="block text-right lg:hidden text-xs text-base-content/60 mb-0.5">{s.active ? <span class="badge badge-success badge-xs text-white">Active</span> : <span class="badge badge-ghost badge-xs">Inactive</span>}</span>{s.name}</td>
                 <td>{s.contact_person ?? "—"}</td>
@@ -131,7 +138,7 @@ export async function suppliers(c: Context) {
                 </td>
               </tr>
             </>))}
-            {list.length === 0 && (
+            {total === 0 && (
               <tr>
                 <td colspan={7} class="text-center text-base-content/60 py-4">No suppliers yet.</td>
               </tr>
@@ -139,6 +146,7 @@ export async function suppliers(c: Context) {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} total={total} limit={limit} baseUrl="/admin/suppliers" />
     </AdminLayout>,
   )
 }

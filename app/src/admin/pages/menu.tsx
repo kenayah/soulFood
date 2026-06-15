@@ -21,6 +21,12 @@ export async function menu(c: Context) {
     return matchesSearch && matchesCategory
   })
 
+  const itemPage = parseInt(c.req.query("page") || "1")
+  const itemLimit = 4
+  const itemTotal = filteredItems.length
+  const itemOffset = (itemPage - 1) * itemLimit
+  const pagedItems = filteredItems.slice(itemOffset, itemOffset + itemLimit)
+
   return c.html(
     <AdminLayout title="Menu" currentPath="/admin/menu">
       <h1 class="text-2xl font-bold mb-4">Menu Management</h1>
@@ -200,7 +206,7 @@ export async function menu(c: Context) {
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => (
+                {pagedItems.map((item) => (
                   <tr>
                     <td>{item.name}</td>
                     <td>{categories.find((c) => c.id === item.category_id)?.name ?? "—"}</td>
@@ -236,7 +242,7 @@ export async function menu(c: Context) {
                     </td>
                   </tr>
                 ))}
-                {filteredItems.length === 0 && (
+                {pagedItems.length === 0 && (
                   <tr>
                     <td colspan={7} class="text-center text-base-content/60 py-4">No items found.</td>
                   </tr>
@@ -245,9 +251,7 @@ export async function menu(c: Context) {
             </table>
           </div>
 
-          {!searchQuery && !categoryFilter && items.length > 10 && (
-            <p class="text-base-content/60 text-center mt-2">{items.length} items total</p>
-          )}
+          <Pagination page={itemPage} total={itemTotal} limit={itemLimit} baseUrl="/admin/menu" additionalParams={{ tab: "items" }} />
 
           <dialog id="newItemModal" class="modal">
             <div class="modal-box max-w-xl">

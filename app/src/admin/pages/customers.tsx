@@ -7,7 +7,7 @@ import { fmtStatus } from "../helpers"
 export async function customers(c: Context) {
   const db = c.env.DB
   const page = parseInt(c.req.query("page") || "1")
-  const limit = 20
+  const limit = 6
   const { customers: list, total } = await getCustomers(db, page, limit)
 
   const editId = c.req.query("edit")

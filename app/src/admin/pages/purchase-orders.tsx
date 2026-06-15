@@ -22,6 +22,12 @@ export async function purchaseOrders(c: Context) {
   const viewItems = viewId ? await getPurchaseOrderItems(db, parseInt(viewId)) : null
   const viewPoData = viewPo as { id: number; supplier_name: string; status: string; total: number | null; expected_delivery: string | null; received_at: string | null; created_at: string } | null
 
+  const page = parseInt(c.req.query("page") || "1")
+  const limit = 5
+  const total = poList.length
+  const offset = (page - 1) * limit
+  const paged = poList.slice(offset, offset + limit) as { id: number; supplier_name: string; status: string; total: number | null; expected_delivery: string | null; received_at: string | null; created_at: string }[]
+
   return c.html(
     <AdminLayout title="Purchase Orders" currentPath="/admin/purchase-orders">
       <h1 class="text-2xl font-bold mb-4">Purchase Orders</h1>
@@ -107,7 +113,7 @@ function addPOItem() {
             </tr>
           </thead>
           <tbody>
-            {(poList as { id: number; supplier_name: string; status: string; total: number | null; expected_delivery: string | null; received_at: string | null; created_at: string }[]).map((po) => (
+            {(paged as { id: number; supplier_name: string; status: string; total: number | null; expected_delivery: string | null; received_at: string | null; created_at: string }[]).map((po) => (
               <tr>
                 <td class="font-mono">#{po.id}</td>
                 <td>{po.supplier_name}</td>
@@ -135,7 +141,7 @@ function addPOItem() {
                 </td>
               </tr>
             ))}
-            {(poList as unknown[]).length === 0 && (
+            {total === 0 && (
               <tr>
                 <td colspan={7} class="text-center text-base-content/60 py-4">No purchase orders yet.</td>
               </tr>
@@ -143,6 +149,7 @@ function addPOItem() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} total={total} limit={limit} baseUrl="/admin/purchase-orders" />
 
       {viewPoData && viewItems && (
         <dialog id="viewPoModal" class="modal modal-open">

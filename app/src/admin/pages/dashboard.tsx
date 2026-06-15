@@ -7,7 +7,7 @@ import { fmtStatus } from "../helpers"
 export async function dashboard(c: Context) {
   const db = c.env.DB
   const page = parseInt(c.req.query("page") || "1")
-  const limit = 7
+  const limit = 6
   const stats = await getDashboardStats(db, page, limit)
 
   return c.html(
