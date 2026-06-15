@@ -2,6 +2,7 @@ import type { Context } from "hono"
 import { AdminLayout } from "../layout"
 import { getCustomers, getCustomerById, getOrdersByCustomer, updateCustomer } from "../../features/orders/service"
 import { Pagination } from "../components/pagination"
+import { fmtStatus } from "../helpers"
 
 export async function customers(c: Context) {
   const db = c.env.DB
@@ -76,7 +77,7 @@ export async function customers(c: Context) {
                               o.status === "cancelled" ? "badge-error" :
                               o.status === "placed" ? "badge-info" :
                               "badge-ghost"
-                            )}>{o.status}</span></td>
+                            )}>{fmtStatus(o.status)}</span></td>
                             <td>R{o.total.toFixed(2)}</td>
                             <td>{o.created_at}</td>
                           </tr>

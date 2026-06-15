@@ -2,11 +2,12 @@ import type { Context } from "hono"
 import { AdminLayout } from "../layout"
 import { getDashboardStats } from "../../features/orders/service"
 import { Pagination } from "../components/pagination"
+import { fmtStatus } from "../helpers"
 
 export async function dashboard(c: Context) {
   const db = c.env.DB
   const page = parseInt(c.req.query("page") || "1")
-  const limit = 10
+  const limit = 7
   const stats = await getDashboardStats(db, page, limit)
 
   return c.html(
@@ -53,7 +54,7 @@ export async function dashboard(c: Context) {
                     order.status === "delivered" ? "success" :
                     order.status === "placed" ? "warning" :
                     order.status === "cancelled" ? "error" : "info"
-                  )}>{order.status}</span>
+                  )}>{fmtStatus(order.status)}</span>
                 </td>
                 <td>R{order.total.toFixed(2)}</td>
                 <td>{order.created_at}</td>

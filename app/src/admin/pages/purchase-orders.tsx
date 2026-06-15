@@ -9,6 +9,8 @@ import {
   createPurchaseOrder,
   receivePurchaseOrder,
 } from "../../features/stock/service"
+import { Pagination } from "../components/pagination"
+import { fmtStatus } from "../helpers"
 
 export async function purchaseOrders(c: Context) {
   const db = c.env.DB
@@ -117,7 +119,7 @@ function addPOItem() {
                   ) : po.status === "sent" ? (
                     <span class="badge badge-info text-white">Sent</span>
                   ) : (
-                    <span class="badge badge-ghost">{po.status}</span>
+                    <span class="badge badge-ghost">{fmtStatus(po.status)}</span>
                   )}
                 </td>
                 <td class="font-mono">{po.total != null ? "R" + po.total.toFixed(2) : "—"}</td>

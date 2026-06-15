@@ -2,6 +2,7 @@ import type { Context } from "hono"
 import { AdminLayout } from "../layout"
 import { getOrders, getOrderById, getOrderItems, getOrderStatusLog, updateOrderStatus } from "../../features/orders/service"
 import { Pagination } from "../components/pagination"
+import { fmtStatus } from "../helpers"
 
 const STATUS_FLOW = ["placed", "confirmed", "preparing", "ready", "out_for_delivery", "delivered"]
 
@@ -15,7 +16,7 @@ function statusBadge(status: string) {
     ready: "primary",
     out_for_delivery: "info",
   }
-  return <span class={"badge text-white badge-" + (colors[status] ?? "neutral")}>{status}</span>
+  return <span class={"badge text-white badge-" + (colors[status] ?? "neutral")}>{fmtStatus(status)}</span>
 }
 
 export async function listOrders(c: Context) {
