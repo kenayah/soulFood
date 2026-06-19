@@ -269,6 +269,20 @@ px      68    160    252    */
   #blog .block .btn-more-info:hover {
     border-radius: 10px;
   }
+  .post {
+    flex-direction: column;
+  }
+  .post-img,
+  .post-content {
+    flex-basis: 100%;
+  }
+  .post-img img {
+    max-height: 220px;
+    object-fit: cover;
+  }
+  .post-content::before {
+    display: none;
+  }
   /*--
     price Start
 --*/
