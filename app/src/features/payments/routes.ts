@@ -9,8 +9,8 @@ app.post("/transactions", async (c) => {
   const body = await c.req.json()
   const db = getDb(c.env)
   try {
-    const tx = await createTransaction(db, body.orderId, body.provider, body.amount)
-    return c.json(tx, 201)
+    const { transaction, redirectUrl } = await createTransaction(db, body.orderId, body.provider, body.amount)
+    return c.json({ transaction, redirectUrl }, 201)
   } catch (e) {
     return c.json({ error: (e as Error).message }, 400)
   }

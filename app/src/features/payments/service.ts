@@ -1,5 +1,5 @@
 import type { D1Database } from "@cloudflare/workers-types"
-import { queryAll, queryOne, execute } from "../../lib/d1"
+import { queryAll, queryOne } from "../../lib/d1"
 
 export interface PaymentProvider {
   name: string
@@ -11,6 +11,7 @@ export interface PaymentProvider {
 export interface TransactionResult {
   status: "pending" | "completed" | "failed"
   providerTxId: string | null
+  redirectUrl?: string
 }
 
 export interface TransactionRow {
@@ -40,6 +41,37 @@ class CashProvider implements PaymentProvider {
   }
 }
 
+export class YocoProvider implements PaymentProvider {
+  name = "card"
+  private secretKey: string
+  private siteBaseUrl: string
+
+  constructor(secretKey: string, siteBaseUrl: string) {
+    this.secretKey = secretKey
+    this.siteBaseUrl = siteBaseUrl
+  }
+
+  async createTransaction(orderId: number, amount: number): Promise<TransactionResult> {
+    const { createYocoCheckout } = await import("./yoco")
+    const checkout = await createYocoCheckout(this.secretKey, {
+      amount: Math.round(amount * 100),
+      currency: "ZAR",
+      successUrl: `${this.siteBaseUrl}/?payment=success&order=${orderId}`,
+      cancelUrl: `${this.siteBaseUrl}/?payment=cancelled&order=${orderId}`,
+      metadata: { orderId: String(orderId) },
+    })
+    return { status: "pending", providerTxId: checkout.id, redirectUrl: checkout.redirectUrl }
+  }
+
+  async verifyTransaction(txId: string): Promise<"completed" | "failed" | "pending"> {
+    return "pending"
+  }
+
+  async refund(_txId: string): Promise<boolean> {
+    return false
+  }
+}
+
 const providers = new Map<string, PaymentProvider>()
 providers.set("cash", new CashProvider())
 
@@ -56,13 +88,13 @@ export async function createTransaction(
   orderId: number,
   provider: string,
   amount: number,
-): Promise<TransactionRow | null> {
+): Promise<{ transaction: TransactionRow; redirectUrl?: string }> {
   const prov = getProvider(provider)
   if (!prov) throw new Error(`Unknown payment provider: ${provider}`)
 
   const result = await prov.createTransaction(orderId, amount)
 
-  return queryOne<TransactionRow>(
+  const transaction = await queryOne<TransactionRow>(
     db,
     `INSERT INTO transactions (order_id, provider, provider_tx_id, amount, status)
      VALUES (?, ?, ?, ?, ?) RETURNING *`,
@@ -71,6 +103,23 @@ export async function createTransaction(
     result.providerTxId,
     amount,
     result.status,
+  )
+  if (!transaction) throw new Error("Failed to create transaction")
+
+  return { transaction, redirectUrl: result.redirectUrl }
+}
+
+export async function updateTransaction(
+  db: D1Database,
+  providerTxId: string,
+  status: string,
+): Promise<TransactionRow | null> {
+  return queryOne<TransactionRow>(
+    db,
+    `UPDATE transactions SET status = ?, updated_at = datetime('now')
+     WHERE provider_tx_id = ? RETURNING *`,
+    status,
+    providerTxId,
   )
 }
 
@@ -88,5 +137,16 @@ export async function getTransactions(
   return queryAll<TransactionRow>(
     db,
     "SELECT * FROM transactions ORDER BY created_at DESC LIMIT 50",
+  )
+}
+
+export async function getTransactionByProviderTxId(
+  db: D1Database,
+  providerTxId: string,
+): Promise<TransactionRow | null> {
+  return queryOne<TransactionRow>(
+    db,
+    "SELECT * FROM transactions WHERE provider_tx_id = ?",
+    providerTxId,
   )
 }

@@ -61,7 +61,18 @@ Copy the database IDs into `wrangler.toml`.
 
 > Migrations are also applied automatically at Worker startup by `init-db.ts` (idempotent — uses `IF NOT EXISTS` / try-catch). Manual execution is only needed for initial setup or production deploys.
 
-### 5. Run everything together
+### 5. Configure Yoco (for card payments)
+
+To test card payments locally, get a Yoco test secret key from https://www.yoco.com/za/online-checkout and set it in `app/.dev.vars`:
+
+```
+YOCO_SECRET_KEY=sk_test_abc123
+SITE_BASE_URL=http://localhost:1313
+```
+
+Without these, card payments return a `503` error and the frontend defaults to showing only cash (which is restricted to returning customers). You can still develop the API — cash orders work without any Yoco setup.
+
+### 6. Run everything together
 
 The menu is fetched dynamically from the API — both servers must be running.
 

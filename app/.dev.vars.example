@@ -1,1 +1,4 @@
 ADMIN_TOKEN = "test"
+YOCO_SECRET_KEY = "sk_test_xxx"
+YOCO_WEBHOOK_SECRET = "whsec_xxx"
+SITE_BASE_URL = "http://localhost:1313"

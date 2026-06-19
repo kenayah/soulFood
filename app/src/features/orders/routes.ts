@@ -1,6 +1,5 @@
 import { Hono } from "hono"
-import type { D1Database } from "@cloudflare/workers-types"
-import { getDb } from "../../lib/d1"
+import { getDb, queryOne } from "../../lib/d1"
 import { orderSchema, statusUpdateSchema } from "../../lib/validators"
 import {
   createOrder,
@@ -12,8 +11,10 @@ import {
   cancelOrder,
   getOrderStatusLog,
 } from "./service"
+import { createTransaction, getProvider } from "../payments/service"
+import type { AppBindings } from "../../env"
 
-const app = new Hono<{ Bindings: { DB: D1Database } }>()
+const app = new Hono<{ Bindings: AppBindings }>()
 
 app.post("/", async (c) => {
   const body = await c.req.json()
@@ -23,7 +24,26 @@ app.post("/", async (c) => {
   const db = getDb(c.env)
   const { items, ...orderData } = parsed.data
 
-  // Upsert customer by phone
+  // Check existing customer for cash eligibility
+  const existing = await queryOne<{ id: number; total_orders: number }>(
+    db,
+    "SELECT id, total_orders FROM customers WHERE phone = ?",
+    orderData.phone,
+  )
+
+  if (orderData.paymentMethod === "cash") {
+    const prevOrders = existing?.total_orders ?? 0
+    if (prevOrders <= 3) {
+      return c.json({
+        error: {
+          message: "Cash on delivery is available for customers with more than 3 orders. Please pay with card for this order.",
+          code: "CASH_NOT_ELIGIBLE",
+        },
+      }, 403)
+    }
+  }
+
+  // Upsert customer by phone (increments total_orders)
   const customerId = await upsertCustomer(db, {
     name: orderData.customerName,
     phone: orderData.phone,
@@ -34,7 +54,6 @@ app.post("/", async (c) => {
   // Resolve item names and prices from DB
   const itemDetails = await Promise.all(
     items.map(async (item) => {
-      // Use frontend-provided itemName (includes starch) if available
       if (item.itemName) {
         const price = await c.env.DB.prepare(
           "SELECT price FROM menu_items WHERE id = ?",
@@ -59,6 +78,17 @@ app.post("/", async (c) => {
   )
 
   const order = await createOrder(db, { ...orderData, items: itemDetails, customerId })
+
+  // For card payments, create Yoco checkout
+  if (orderData.paymentMethod === "card") {
+    const prov = getProvider("card")
+    if (!prov) {
+      return c.json({ error: "Card payment is not available right now" }, 503)
+    }
+    const { redirectUrl } = await createTransaction(db, order.id, "card", order.total)
+    return c.json({ ...order, redirectUrl }, 201)
+  }
+
   return c.json(order, 201)
 })
 

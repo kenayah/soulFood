@@ -1,8 +1,15 @@
 # Receiving Payment
 
-> **Status:** Interface defined, provider-specific implementation pending.
+> **Status:** Yoco Checkout (card) + Cash on Delivery (restricted) — both implemented.
 
-Payment verification is the gate between order placement and kitchen preparation. No payment verification = no cooking starts.
+Payment verification is the gate between order placement and kitchen preparation.
+
+## Payment Methods
+
+| Method | Eligibility | Flow |
+|--------|-------------|------|
+| **Card** (Yoco) | All customers | Redirect to hosted Yoco Checkout page, pay now |
+| **Cash on Delivery** | Returning customers with `total_orders > 3` | Pay on handover, operator verifies |
 
 ## Payment Interface
 
@@ -11,9 +18,15 @@ Payments are handled via a pluggable provider interface:
 ```typescript
 interface PaymentProvider {
   name: string
-  createTransaction(order: Order): Promise<TransactionResult>
-  verifyTransaction(txId: string): Promise<PaymentStatus>
-  refund(txId: string): Promise<RefundResult>
+  createTransaction(orderId: number, amount: number): Promise<TransactionResult>
+  verifyTransaction(txId: string): Promise<"completed" | "failed" | "pending">
+  refund(txId: string): Promise<boolean>
+}
+
+interface TransactionResult {
+  status: "pending" | "completed" | "failed"
+  providerTxId: string | null
+  redirectUrl?: string
 }
 ```
 
@@ -22,7 +35,7 @@ New providers implement this interface and register in a provider registry:
 ```typescript
 const providers = new Map<string, PaymentProvider>()
 providers.set("cash", new CashProvider())
-providers.set("yoco", new YocoProvider())
+providers.set("card", new YocoProvider(secretKey, siteUrl))
 ```
 
 ## Transaction Lifecycle
@@ -30,8 +43,8 @@ providers.set("yoco", new YocoProvider())
 ```mermaid
 stateDiagram-v2
     [*] --> Pending: Order placed
-    Pending --> Verified: Provider confirms
-    Pending --> Failed: Provider declines
+    Pending --> Verified: Webhook confirms
+    Pending --> Failed: Webhook declines
     Verified --> Captured: Funds settled
     Captured --> Refunded: Customer cancellation
     Failed --> [*]
@@ -56,26 +69,26 @@ stateDiagram-v2
 class CashProvider implements PaymentProvider {
   name = "cash"
 
-  async createTransaction(order: Order): Promise<TransactionResult> {
-    // No external call — mark as pending; operator verifies on handover
+  async createTransaction(orderId: number, amount: number): Promise<TransactionResult> {
     return { status: "pending", providerTxId: null }
   }
 
-  async verifyTransaction(txId: string): Promise<PaymentStatus> {
-    // Operator manually marks as "verified" after receiving cash
-    return "verified"
+  async verifyTransaction(txId: string): Promise<"completed" | "failed" | "pending"> {
+    return "completed"
   }
 
-  async refund(txId: string): Promise<RefundResult> {
-    // Manual process
-    return { success: true }
+  async refund(txId: string): Promise<boolean> {
+    return true
   }
 }
 ```
 
+### Yoco (card) — implemented
+
+See [Payments Feature](../features/payments.md) for full details.
+
 ### Planned Providers
 
-- [ ] **Yoco** — SA card payment gateway (POS + online)
 - [ ] **PayFast** — SA EFT and card payments
 - [ ] **Stripe** — International card payments
 

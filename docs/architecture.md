@@ -72,25 +72,29 @@ The public site is a brochure — menu, about, blog, contact. It's static conten
 
 ## Data Flow
 
-### Order Placement
+### Order Placement (Card Payment)
 
 ```mermaid
 sequenceDiagram
     participant C as Customer
     participant W as Hono Worker
     participant D1 as D1 Database
+    participant Y as Yoco Checkout
     participant N as Notifications
 
-    C->>W: POST /api/orders (cart, customer info)
+    C->>W: POST /api/orders (cart, customer info, paymentMethod: "card")
     W->>D1: UPSERT customer by phone
-    W->>D1: INSERT order (status: placed, customer_id)
+    W->>D1: INSERT order (status: placed, payment_status: pending)
     W->>D1: INSERT order_items (with itemName including starch)
+    W->>Y: POST /api/checkouts (amount, return URLs)
+    Y-->>W: { checkoutId, redirectUrl }
+    W->>D1: INSERT transaction (provider_tx_id: checkoutId)
+    W-->>C: { orderId, redirectUrl }
+    C->>Y: Redirect to Yoco checkout page
+    Y-->>C: Payment completed, redirect back
+    Y->>W: POST /api/webhook/yoco { status: "completed" }
+    W->>D1: UPDATE payment_status = "verified", status = "confirmed"
     W->>N: notify("new_order", orderId)
-    N-->>Admin: new order alert
-    W-->>C: { orderId, status: "placed" }
-    C->>W: GET /orders/{id} (poll for status)
-    W->>D1: SELECT order, order_items
-    W-->>C: { status: "confirmed" }
 ```
 
 ## Security
@@ -105,7 +109,7 @@ sequenceDiagram
 
 - **Multi-tenant** — D1 supports separate DB per tenant or tenant_id column
 - **WebSocket upgrade** — swap polling transport for Durable Objects
-- **Payment providers** — implement the `PaymentProvider` interface for Yoco/PayFast/Stripe
+- **Payment providers** — Yoco Checkout implemented; PayFast and Stripe still on the roadmap
 - **Image uploads** — Cloudflare Images or R2 for menu photos
 - **Offline fallback** — Cloudflare Workers can cache D1 queries at the edge
 

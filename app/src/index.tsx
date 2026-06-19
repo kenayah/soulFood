@@ -10,15 +10,18 @@ import reportingRoutes from "./features/reporting/routes"
 import paymentsRoutes from "./features/payments/routes"
 import notificationsRoutes from "./features/notifications/routes"
 import publicRoutes from "./features/public/routes"
+import webhookRoutes from "./features/payments/webhook"
 import adminRoutes from "./admin/routes"
 import { requireAuth } from "./auth/middleware"
 import { initDb } from "./lib/init-db"
-import type { D1Database } from "@cloudflare/workers-types"
+import { registerProvider, YocoProvider } from "./features/payments/service"
+import type { AppBindings } from "./env"
 
-const app = new Hono<{ Bindings: { DB: D1Database } }>()
+const app = new Hono<{ Bindings: AppBindings }>()
 
 // Run database migration on first request (dev-friendly)
 let dbInitRan = false
+let providersRegistered = false
 app.use("*", async (c, next) => {
   if (!dbInitRan) {
     dbInitRan = true
@@ -36,6 +39,14 @@ app.use("*", async (c, next) => {
       )
     }
   }
+  if (!providersRegistered) {
+    providersRegistered = true
+    const yocoKey = c.env.YOCO_SECRET_KEY
+    const siteUrl = c.env.SITE_BASE_URL ?? "https://kenayah.github.io/soulFood"
+    if (yocoKey) {
+      registerProvider(new YocoProvider(yocoKey, siteUrl))
+    }
+  }
   await next()
 })
 
@@ -48,6 +59,7 @@ app.get("/api/health", (c) => c.json({ status: "ok", service: "soulfood-api" }))
 // Public routes
 app.route("/api/orders", ordersRoutes)
 app.route("/api/public", publicRoutes)
+app.route("/api/webhook", webhookRoutes)
 
 // Authenticated API routes
 app.use("/api/menu/*", requireAuth)

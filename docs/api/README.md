@@ -157,6 +157,8 @@ GET /api/public/menu
 
 Same as the admin `POST /api/orders`. Customer records are upserted by phone number automatically. The frontend may send an `itemName` with the starch choice appended (e.g. "Mogodu Wednesday (Creamy Samp)") rather than the bare menu item name.
 
+`paymentMethod` accepts `"card"` or `"cash"`. Cash on delivery is restricted to customers with more than 3 previous orders (returns `403` otherwise).
+
 ```http
 POST /api/orders
 Content-Type: application/json
@@ -173,18 +175,62 @@ Content-Type: application/json
 }
 ```
 
-**Response:** `201 Created`
+**Response (cash):** `201 Created`
 
 ```json
 {
   "id": 42,
-  "customer_id": 7,
   "customer_name": "Thandi",
   "phone": "0712345678",
   "status": "placed",
   "total": 180.00
 }
 ```
+
+**Response (card):** `201 Created` — includes `redirectUrl` for Yoco Checkout
+
+```json
+{
+  "id": 42,
+  "customer_name": "Thandi",
+  "phone": "0712345678",
+  "status": "placed",
+  "total": 180.00,
+  "redirectUrl": "https://pay.yoco.com/checkout_abc123"
+}
+```
+
+**Error (cash not eligible):** `403 Forbidden`
+
+```json
+{
+  "error": {
+    "code": "CASH_NOT_ELIGIBLE",
+    "message": "Cash on delivery is available for customers with more than 3 orders. Please pay with card for this order."
+  }
+}
+```
+
+## Webhook Endpoints
+
+### Yoco Payment Notification (Public — no auth)
+
+Yoco sends a POST to this endpoint after a payment is completed or fails. The handler updates the transaction and order statuses accordingly.
+
+```http
+POST /api/webhook/yoco
+Content-Type: application/json
+
+{
+  "id": "checkout_abc123",
+  "status": "completed",
+  "metadata": {
+    "orderId": "42"
+  }
+}
+```
+
+**Response:** `200 OK`
 
 ## Menu Endpoints
 

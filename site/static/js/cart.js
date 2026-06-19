@@ -180,6 +180,7 @@
       var phone = $('#checkout-phone').val().trim()
       var address = $('#checkout-address').val().trim()
       var notes = $('#checkout-notes').val().trim()
+      var paymentMethod = $('input[name="payment"]:checked').val() || 'card'
 
       if (!name) { self.showError('Please enter your name'); return }
       if (!phone) { self.showError('Please enter your phone number'); return }
@@ -192,7 +193,7 @@
         phone: phone,
         deliveryAddress: address || undefined,
         notes: notes || undefined,
-        paymentMethod: 'cash',
+        paymentMethod: paymentMethod,
         items: items.map(function (i) {
           var menuItemId = parseInt(i.id, 10)
           var itemName = i.title + (i.starch ? ' (' + i.starch + ')' : '')
@@ -208,10 +209,25 @@
         contentType: 'application/json',
         data: JSON.stringify(payload),
         success: function (order) {
-          // Save customer details for next order
           try {
             localStorage.setItem('soulfood_checkout', JSON.stringify({ name: name, phone: phone, address: address, notes: notes }))
           } catch (e) {}
+
+          if (order.redirectUrl) {
+            self.clear()
+            self.close()
+            sessionStorage.setItem('soulfood_pending_order', JSON.stringify({
+              id: order.id,
+              items: items,
+              total: total,
+              name: name,
+              phone: phone,
+              address: address,
+              notes: notes,
+            }))
+            window.location.href = order.redirectUrl
+            return
+          }
 
           var msg = 'Order #' + order.id + ' confirmed!\n' +
             items.map(function (i) { return i.qty + 'x ' + i.title + (i.starch ? ' (' + i.starch + ')' : '') }).join('\n') +
@@ -230,7 +246,11 @@
           var msg = 'Could not place order'
           try {
             var err = JSON.parse(xhr.responseText)
-            if (err.error) msg += ': ' + (err.error.message || JSON.stringify(err.error))
+            if (err.error && err.error.message) {
+              msg = err.error.message
+            } else if (err.error) {
+              msg += ': ' + JSON.stringify(err.error)
+            }
           } catch (e) {}
           self.showError(msg)
         }
@@ -339,7 +359,57 @@
     }
   }
 
+  function handlePaymentReturn() {
+    var params = new URLSearchParams(window.location.search)
+    var payment = params.get('payment')
+    if (!payment) return
+
+    var orderId = params.get('order')
+
+    if (payment === 'success') {
+      var pending = sessionStorage.getItem('soulfood_pending_order')
+      if (pending) {
+        var data = JSON.parse(pending)
+        var msg = 'Order #' + data.id + ' paid and confirmed!\n' +
+          data.items.map(function (i) { return i.qty + 'x ' + i.title + (i.starch ? ' (' + i.starch + ')' : '') }).join('\n') +
+          '\n\nTotal: R ' + data.total.toFixed(2) +
+          '\n\nName: ' + data.name +
+          '\nPhone: ' + data.phone +
+          (data.address ? '\nAddress: ' + data.address : '') +
+          (data.notes ? '\nNotes: ' + data.notes : '') +
+          '\n\nYour order is being prepared!'
+        sessionStorage.removeItem('soulfood_pending_order')
+        window.open('https://wa.me/0694660013?text=' + encodeURIComponent(msg), '_blank')
+      }
+      showPaymentBanner('Payment successful! Order #' + orderId + ' has been confirmed.', 'success')
+    } else if (payment === 'cancelled') {
+      showPaymentBanner('Payment was cancelled. Your order #' + orderId + ' is pending — please try again.', 'error')
+    }
+
+    // Clean URL params
+    var url = window.location.pathname + window.location.hash
+    window.history.replaceState(null, '', url)
+  }
+
+  function showPaymentBanner(msg, type) {
+    var $banner = $('#payment-banner')
+    if (!$banner.length) {
+      $banner = $('<div id="payment-banner" class="payment-banner"></div>')
+      $('body').prepend($banner)
+    }
+    $banner
+      .text(msg)
+      .removeClass('payment-banner--success payment-banner--error')
+      .addClass('payment-banner--' + type)
+      .addClass('payment-banner--visible')
+
+    setTimeout(function () {
+      $banner.removeClass('payment-banner--visible')
+    }, 8000)
+  }
+
   $(document).ready(function () {
+    handlePaymentReturn()
     Cart.init()
   })
 })(jQuery)

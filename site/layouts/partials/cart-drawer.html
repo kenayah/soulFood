@@ -30,6 +30,18 @@
       <input type="tel" id="checkout-phone" class="checkout-input" placeholder="Phone number *" required>
       <input type="text" id="checkout-address" class="checkout-input" placeholder="Delivery address (optional)">
       <textarea id="checkout-notes" class="checkout-input checkout-textarea" placeholder="Order notes (optional)"></textarea>
+      <div class="payment-methods">
+        <label class="payment-method">
+          <input type="radio" name="payment" value="card" checked>
+          <span class="payment-method-label">Card Payment</span>
+          <span class="payment-method-desc">Pay now with card</span>
+        </label>
+        <label class="payment-method" id="payment-method-cash">
+          <input type="radio" name="payment" value="cash">
+          <span class="payment-method-label">Cash on Delivery</span>
+          <span class="payment-method-desc">Pay when you receive your order</span>
+        </label>
+      </div>
       <div id="checkout-error" class="checkout-error" style="display:none"></div>
     </div>
   </div>

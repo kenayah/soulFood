@@ -101,13 +101,22 @@ The Hugo site's cart drawer submits orders via two channels:
 1. **API** — `POST /api/orders` saves the order to D1 (name, phone, address, items, total); customer record is upserted by phone
 2. **WhatsApp** — `wa.me/0694660013` opens with a human-readable order summary including the order number from the API response
 
+### Payment Methods
+
+The checkout form offers two payment methods:
+
+- **Card Payment** — Available to all customers. Order is created, customer is redirected to Yoco Checkout (hosted payment page), then returned to the site on completion.
+- **Cash on Delivery** — Available only to customers with `total_orders > 3`. New customers see an error suggesting card payment.
+
 ### Checkout Flow
 
 1. Customer adds items → clicks "Place Order"
-2. Checkout form slides into the drawer (name, phone, delivery address, notes)
-3. "Submit Order" POSTs to the API, then opens WhatsApp with the confirmation
-4. Cart clears on success; inline error shown on failure
-5. Customer details (name, phone, address, notes) are saved to `localStorage` (`soulfood_checkout`) and pre-filled in the form on the next visit
+2. Checkout form slides into the drawer (name, phone, delivery address, notes, **payment method**)
+3. **Card:** Order created → Yoco Checkout URL returned → customer redirected → pays → returns → WhatsApp confirmation
+4. **Cash (eligible):** Order created → WhatsApp confirmation
+5. **Cash (not eligible):** Inline error displayed, customer switches to card
+6. Cart clears on success
+7. Customer details (name, phone, address, notes) are saved to `localStorage` (`soulfood_checkout`) and pre-filled in the form on the next visit
 
 ## Customer Communication
 
