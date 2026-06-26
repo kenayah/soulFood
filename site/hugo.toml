@@ -6,7 +6,7 @@ theme = "restaurant-hugo"
 [params]
 logo = "images/logo.webp"
 apiBaseURL = "http://localhost:8787"
-copyright = "Powered by goConsult"
+copyright = "Powered by <a href='https://goconsult.cg'>goConsult</a>"
 
 [[menu.main]]
 name = "Plates"
