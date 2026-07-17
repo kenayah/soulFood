@@ -6,7 +6,8 @@ Online takeaway management system for a South African comfort food business.
 
 - **Stack:** Hono + Cloudflare Workers + D1 (SQLite) for backend/admin, Hugo static site for public storefront
 - **Deploy:** GitHub Actions → Cloudflare Workers (API) + GitHub Pages (Hugo site)
-- **Branch:** `dev` (development), `main` (production)
+- **Branch strategy:** `dev` is the primary working branch. All feature work happens on `dev` (or feature branches off `dev`). Merge to `main` only when features are complete and ready for production.
+- **Repo:** github.com/kenayah/soulFood
 - **Repo:** github.com/kenayah/soulFood
 
 ## Last Session Notes
